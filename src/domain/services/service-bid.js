@@ -1,6 +1,6 @@
-import magic from '../../utils/magic';
-import enum_ from '../../utils/enum';
-import ormBid from '../../domain/orm/orm-bid';
+import magic from '../../utils/magic.js';
+import enum_ from '../../utils/enum.js';
+import ormBid from '../../domain/orm/orm-bid.js';
 
 exports.Create = async (req, res) => {
   let status = 'Success',
