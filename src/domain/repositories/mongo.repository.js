@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
+import bid from '../entities/entity-bid';
 import config from 'config-yml';
 import magic from '../../utils/magic';
 
@@ -16,6 +17,7 @@ if (config.db.mongodb && config.db.mongodb.length > 0) {
     });
     db[c.nameconn] = {};
     db[c.nameconn].conn = mongoose;
+    db[c.nameconn].Bid = bid(mongoose);
   });
   magic.LogInfo('Conectado a la base de datos 🚀');
 } else {
