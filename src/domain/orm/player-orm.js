@@ -10,11 +10,14 @@ export const Create = async (req) => {
   try {
     const newPlayer = new db.Player(req.body);
     const playerExists = await db.Player.findOne({
-      nickname: newUser.nickname,
+      nickname: newPlayer.nickname,
     });
     if (playerExists) return LogDanger('That player already exists');
+    const savedPlayer = await newPlayer.save();
+    console.log(savedPlayer)
+    return savedPlayer;
   } catch (error) {
-    LogDanger('User register failed', err);
-    return await { err: { code: 123, message: err } };
+    LogDanger('User register failed', error);
+    return await { err: { code: 123, message: error } };
   }
 };
