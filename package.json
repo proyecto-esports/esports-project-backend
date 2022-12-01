@@ -32,7 +32,7 @@
     "esm": "^3.2.25",
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.7.4"
+    "mongoose": "^6.7.5"
   },
   "devDependencies": {
     "eslint": "^8.28.0",
