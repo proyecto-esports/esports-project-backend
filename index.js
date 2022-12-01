@@ -1,10 +1,10 @@
 import config from 'config-yml';
 
-import app from './src/server';
-import magic from './src/utils/magic';
+import app from './src/server/index.js';
+import {LogInfo} from './src/utils/magic.js';
 
 app.listen(config.port, () => {
-  magic.LogInfo(`Server running on http://localhost:${config.port}`);
+  LogInfo(`Server running on http://localhost:${config.port}`);
 });
 
 app.on('err', (err) => {
