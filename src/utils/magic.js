@@ -1,4 +1,4 @@
-import * as enum_ from './enum';
+import * as enum_ from './enum.js';
 
 export const ResponseService = async (status, errorCode, message, data) => {
   return await {
