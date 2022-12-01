@@ -12,7 +12,6 @@ export const Create = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormPlayer.Create(req);
-    console.log(resOrm);
     if (resOrm.err) {
       (status = 'Failure'),
         (errorcode = resOrm.err.code),
