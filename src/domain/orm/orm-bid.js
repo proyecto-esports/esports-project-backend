@@ -1,5 +1,9 @@
-import conn from '../repositories/mongo.repository';
-import magic from '../../utils/magic';
+import conn from '../repositories/mongo.repository.js';
+import magic from '../../utils/magic.js';
+
+import { db as conn } from '../repositories/mongo.repository.js'
+
+const db = conn.db.connMongo;
 
 exports.Create = async (info) => {
   try {
