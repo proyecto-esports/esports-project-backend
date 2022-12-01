@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
- const user = (db) => {
+const user = (db) => {
   const userSchema = new db.Schema(
     {
       username: { type: String, required: true },
@@ -9,9 +9,9 @@ const mongoose = require('mongoose');
       password: { type: String, required: true },
       role: { type: String, enum: ['user', 'admin'], required: true },
       image: { type: String },
-      points: {type: Number, },
-      lineup: [{type: String}],
-      competition:{type: String}
+      points: { type: Number },
+      lineup: [{ type: String }],
+      competition: { type: String },
     },
     {
       timestamps: true,

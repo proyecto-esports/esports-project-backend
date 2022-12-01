@@ -1,12 +1,12 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+import bcrypt from 'bcrypt';
+import { Jwt } from 'jsonwebtoken';
 
-const conn = require('../repositories/mongo.repository');
-const magic = require('../../utils/magic');
+import conn from '../repositories/mongo.repository';
+import magic from '../../utils/magic';
 
 const db = conn.db.connMongo;
 
-exports.Create = async (req) => {
+export const Create = async (req) => {
   try {
     const newUser = new db.User(req.body);
     console.log(newUser);
@@ -27,7 +27,7 @@ exports.Create = async (req) => {
   }
 };
 
-exports.Login = async (req) => {
+export const Login = async (req) => {
   try {
     const userByNickname = await db.User.findOne({
       nickname: req.body.nickname,
@@ -69,7 +69,7 @@ exports.Login = async (req) => {
   }
 };
 
-exports.GetAll = async () => {
+export const GetAll = async () => {
   try {
     return await db.User.find().populate('department incidents');
   } catch (err) {
@@ -78,7 +78,7 @@ exports.GetAll = async () => {
   }
 };
 
-exports.Update = async (req) => {
+export const Update = async (req) => {
   try {
     const { id } = req.params;
     const user = new db.User(req.body);
@@ -96,7 +96,7 @@ exports.Update = async (req) => {
   }
 };
 
-exports.Delete = async (req) => {
+export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const deletedUser = await db.User.findByIdAndDelete(id);
@@ -111,7 +111,7 @@ exports.Delete = async (req) => {
   }
 };
 
-exports.GetOne = async (req) => {
+export const GetOne = async (req) => {
   try {
     const { id } = req.params;
     const user = await db.User.findById(id);
@@ -126,7 +126,7 @@ exports.GetOne = async (req) => {
   }
 };
 
-exports.GetNickname = async (req) => {
+export const GetNickname = async (req) => {
   try {
     const { nickname } = req.params;
     const user = await db.User.findOne({ nickname: nickname });

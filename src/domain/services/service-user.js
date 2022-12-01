@@ -1,8 +1,8 @@
-const magic = require('../../utils/magic');
-import _enum =
-import ormUser from "../orm/orm-user"
+import magic from '../../utils/magic';
+import enum_ from '../../utils/enum';
+import ormUser from '../orm/orm-user';
 
-exports.GetAll = async (req, res) => {
+export const GetAll = async (req, res) => {
   let status = 'Success';
   let errorcode = '';
   let message = '';
@@ -35,7 +35,7 @@ exports.GetAll = async (req, res) => {
   }
 };
 
-exports.Create = async (req, res) => {
+export const Create = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -43,7 +43,8 @@ exports.Create = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    const { username, nickname, gmail, password, role, department, image } = req.body;
+    const { username, nickname, gmail, password, role, department, image } =
+      req.body;
     if (username && nickname && gmail && password && role && department) {
       let resOrm = await ormUser.Create(req);
       if (resOrm.err) {
@@ -74,7 +75,7 @@ exports.Create = async (req, res) => {
   }
 };
 
-exports.Login = async (req, res) => {
+export const Login = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -113,8 +114,7 @@ exports.Login = async (req, res) => {
   }
 };
 
-
-exports.Update = async (req, res) => {
+export const Update = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -145,7 +145,7 @@ exports.Update = async (req, res) => {
   }
 };
 
-exports.Delete = async (req, res) => {
+export const Delete = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -176,7 +176,7 @@ exports.Delete = async (req, res) => {
   }
 };
 
-exports.GetOne = async (req, res) => {
+export const GetOne = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -207,7 +207,7 @@ exports.GetOne = async (req, res) => {
   }
 };
 
-exports.GetNickname = async (req, res) => {
+export const GetNickname = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
