@@ -1,19 +1,20 @@
 import bcrypt from 'bcrypt';
-import { Jwt } from 'jsonwebtoken';
+import  jwt  from 'jsonwebtoken';
 
-import conn from '../repositories/mongo.repository';
-import magic from '../../utils/magic';
+import  db  from '../repositories/mongo.repository.js';
+import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
 
-const db = conn.db.connMongo;
+const conn = db.connMongo;
 
 export const Create = async (req) => {
+  console.log('jola');
   try {
-    const newUser = new db.User(req.body);
+    const newUser = new conn.User(req.body);
     console.log(newUser);
-    const userNickname = await db.User.findOne({ nickname: newUser.nickname });
-    const userGmail = await db.User.findOne({ gmail: newUser.gmail });
+    const userNickname = await conn.User.findOne({ nickname: newUser.nickname });
+    const userGmail = await conn.User.findOne({ gmail: newUser.gmail });
     const userExists = userNickname || userGmail;
-    if (userExists) return magic.LogDanger('That user already exists');
+    if (userExists) return LogDanger('That user already exists');
     newUser.password = bcrypt.hashSync(newUser.password, 6);
     if (req.file) {
       newUser.image = req.file.path;
@@ -22,58 +23,58 @@ export const Create = async (req) => {
     const savedUser = await newUser.save();
     return savedUser;
   } catch (err) {
-    magic.LogDanger('User register failed', err);
+    LogDanger('User register failed', err);
     return await { err: { code: 123, message: err } };
   }
 };
 
 export const Login = async (req) => {
   try {
-    const userByNickname = await db.User.findOne({
+    const userByNickname = await conn.User.findOne({
       nickname: req.body.nickname,
     });
-    const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
-    const userInDB = userByNickname || userByGmail;
-    if (!userInDB) return magic.LogDanger("Login credentials doesn't exist");
+    const userByGmail = await conn.User.findOne({ gmail: req.body.gmail });
+    const userInconn = userByNickname || userByGmail;
+    if (!userInconn) return LogDanger("Login credentials doesn't exist");
 
-    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
-      console.log(userInDB);
+    if (bcrypt.compareSync(req.body.password, userInconn.password)) {
+      console.log(userInconn);
       const userToken = jwt.sign(
-        { ...userInDB },
+        { ...userInconn },
         req.app.get('userSecretKey'),
         {
           expiresIn: '1h',
         }
       );
       const adminToken = jwt.sign(
-        { ...userInDB },
+        { ...userInconn },
         req.app.get('adminSecretKey'),
         {
           expiresIn: '1h',
         }
       );
 
-      userInDB.password = null;
+      userInconn.password = null;
 
-      if (userInDB.role === 'admin') {
-        return { user: userInDB, token: adminToken };
+      if (userInconn.role === 'admin') {
+        return { user: userInconn, token: adminToken };
       } else {
-        return { user: userInDB, token: userToken };
+        return { user: userInconn, token: userToken };
       }
     } else {
       return next('User password incorrect');
     }
   } catch (err) {
-    magic.LogDanger('User login failed', err);
+    LogDanger('User login failed', err);
     return await { err: { code: 123, message: err } };
   }
 };
 
 export const GetAll = async () => {
   try {
-    return await db.User.find().populate('department incidents');
+    return await conn.User.find().populate('department incidents');
   } catch (err) {
-    magic.LogDanger('Cannot getAll users', err);
+    LogDanger('Cannot getAll users', err);
     return await { err: { code: 123, message: err } };
   }
 };
@@ -81,17 +82,17 @@ export const GetAll = async () => {
 export const Update = async (req) => {
   try {
     const { id } = req.params;
-    const user = new db.User(req.body);
+    const user = new conn.User(req.body);
     user._id = id;
     user.password = bcrypt.hashSync(user.password, 6);
-    const updatedUser = await db.User.findByIdAndUpdate(id, user);
+    const updatedUser = await conn.User.finconnyIdAndUpdate(id, user);
     return updatedUser;
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -99,14 +100,14 @@ export const Update = async (req) => {
 export const Delete = async (req) => {
   try {
     const { id } = req.params;
-    const deletedUser = await db.User.findByIdAndDelete(id);
+    const deletedUser = await conn.User.finconnyIdAndDelete(id);
     return deletedUser;
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -114,14 +115,14 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id);
+    const user = await conn.User.finconnyId(id);
     return user;
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -129,14 +130,14 @@ export const GetOne = async (req) => {
 export const GetNickname = async (req) => {
   try {
     const { nickname } = req.params;
-    const user = await db.User.findOne({ nickname: nickname });
+    const user = await conn.User.findOne({ nickname: nickname });
     return user;
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };

@@ -1,11 +1,11 @@
 import multer from "multer"
-import { cloudinary } from "cloudinary";
+import  cloudinary  from "cloudinary";
 import {CloudinaryStorage} from "multer-storage-cloudinary";
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "incidentnode",
+    folder: "avatars",
     allowedFormats: ["jpg", "png", "jpeg", "gif"],
   },
 });

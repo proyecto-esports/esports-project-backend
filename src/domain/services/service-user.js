@@ -1,6 +1,7 @@
-import magic from '../../utils/magic';
-import enum_ from '../../utils/enum';
-import ormUser from '../orm/orm-user';
+import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
+import ResponseService from '../../utils/magic.js';
+import * as enum_ from '../../utils/enum.js';
+import * as ormUser from '../orm/orm-user.js';
 
 export const GetAll = async (req, res) => {
   let status = 'Success';
@@ -21,11 +22,11 @@ export const GetAll = async (req, res) => {
         (data = resOrm),
         (statuscode = data.length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
-    magic.LogDanger('err: ', err);
-    response = await magic.ResponseService(
+    LogDanger('err: ', err);
+    response = await ResponseService(
       'Failure',
       enum_.CODE_BAD_REQUEST,
       err,
@@ -36,6 +37,8 @@ export const GetAll = async (req, res) => {
 };
 
 export const Create = async (req, res) => {
+  console.log('holi');
+  console.log(req);
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -43,9 +46,9 @@ export const Create = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    const { username, nickname, gmail, password, role, department, image } =
-      req.body;
-    if (username && nickname && gmail && password && role && department) {
+    const { username, nickname, gmail, password, role } = req.body;
+    console.log(req.body);
+    if (username && nickname && gmail && password && role) {
       let resOrm = await ormUser.Create(req);
       if (resOrm.err) {
         (status = 'Failure'),
@@ -63,14 +66,14 @@ export const Create = async (req, res) => {
         (message = 'Required fields incompleted'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -102,14 +105,14 @@ export const Login = async (req, res) => {
         (message = 'Required field incorrect'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -133,14 +136,14 @@ export const Update = async (req, res) => {
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -164,14 +167,14 @@ export const Delete = async (req, res) => {
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -195,14 +198,14 @@ export const GetOne = async (req, res) => {
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
@@ -226,14 +229,14 @@ export const GetNickname = async (req, res) => {
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }
-    response = await magic.ResponseService(status, errorcode, message, data);
+    response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
