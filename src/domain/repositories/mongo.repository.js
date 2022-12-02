@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-import bid from '../entities/entity-bid.js';
 import config from 'config-yml';
-
 import { LogDanger, LogInfo } from '../../utils/magic.js';
+import bid from '../entities/entity-bid.js';
+import player from '../entities/player-entity.js';
 
 dotenv.config();
 
