@@ -1,5 +1,5 @@
 import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
-import ResponseService from '../../utils/magic.js';
+import {ResponseService} from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
 import * as ormUser from '../orm/orm-user.js';
 

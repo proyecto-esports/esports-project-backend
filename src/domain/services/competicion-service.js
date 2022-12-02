@@ -1,4 +1,4 @@
-import { ResponseService } from '../../utils/magic.js';
+import  {ResponseService}  from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
 import { LogDanger } from '../../utils/magic.js';
 import * as ormCompetition from '../orm/competicion-orm.js';

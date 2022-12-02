@@ -6,7 +6,7 @@ import {LogInfo, LogDanger} from '../../utils/magic.js';
 import user from '../entities/entity-user.js'
 import bid from '../entities/entity-bid.js';
 import player from '../entities/player-entity.js';
-
+import competition from '../entities/competicion-entity.js'
 
 dotenv.config();
 
