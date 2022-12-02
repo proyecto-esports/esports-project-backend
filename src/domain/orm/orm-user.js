@@ -3,6 +3,7 @@ import  jwt  from 'jsonwebtoken';
 
 import {default as conn}  from '../repositories/mongo.repository.js';
 import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
+import { log } from 'config-yml';
 
 const db = conn.connMongo ;
 
@@ -72,7 +73,7 @@ export const Login = async (req) => {
 
 export const GetAll = async () => {
   try {
-    return await db.User.find().populate('department incidents');
+    return await db.User.find();
   } catch (err) {
     LogDanger('Cannot getAll users', err);
     return await { err: { code: 123, message: err } };
@@ -84,8 +85,10 @@ export const Update = async (req) => {
     const { id } = req.params;
     const user = new db.User(req.body);
     user._id = id;
-    user.password = bcrypt.hashSync(user.password, 6);
-    const updatedUser = await db.User.findbyIdAndUpdate(id, user);
+    if (user.password) {
+      user.password = bcrypt.hashSync(user.password, 6);
+    }
+    const updatedUser = await db.User.findByIdAndUpdate(id, user);
     return updatedUser;
   } catch (err) {
     console.log('err = ', err);
@@ -100,10 +103,9 @@ export const Update = async (req) => {
 export const Delete = async (req) => {
   try {
     const { id } = req.params;
-    const deletedUser = await db.User.findbyIdAndDelete(id);
+    const deletedUser = await db.User.findByIdAndDelete(id);
     return deletedUser;
   } catch (err) {
-    console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
@@ -115,7 +117,7 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findbyId(id);
+    const user = await db.User.findById(id);
     return user;
   } catch (err) {
     console.log('err = ', err);
@@ -127,11 +129,41 @@ export const GetOne = async (req) => {
   }
 };
 
-export const GetNickname = async (req) => {
+export const UpdatePlayers = async (req) => {
   try {
-    const { nickname } = req.params;
-    const user = await db.User.findOne({ nickname: nickname });
-    return user;
+    const { id } = req.params;
+    const{player} = req.body
+    const updatedPlantilla = await db.User.findByIdAndUpdate(id, 
+      { $push:{ players: player  }},
+      );
+    return updatedPlantilla;
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdateLineup = async (req) => {
+  try {
+    const { id } = req.params;
+    const {line} = req.body;
+    console.log(line);
+    const userPlayers = await db.User.findById(id);
+    let savePlayers = userPlayers.players;
+    for (let i = 0; i < savePlayers.length; i++) {
+      if (line == savePlayers[i]) {
+        console.log("hola");
+      }
+    }
+    const updatedLineup = await db.User.findByIdAndUpdate(id, 
+      { $push:{ lineup: line  }},
+      );
+      return updatedLineup;
+    
   } catch (err) {
     console.log('err = ', err);
     return res

@@ -47,7 +47,7 @@ export const Create = async (req, res) => {
     response = {};
   try {
     console.log(req.body);
-    const { username, nickname, gmail, password, role } = await req.body;
+    const { username, nickname, gmail, password, role } = req.body;
     
     if (username && nickname && gmail && password && role) {
       let resOrm = await ormUser.Create(req);
@@ -227,6 +227,69 @@ export const GetNickname = async (req, res) => {
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User has been found'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdatePlayers = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.UpdatePlayers(req);
+    if (resOrm.err) {
+      (status = 'Failure'),
+        (errorcode = resOrm.err.code),
+        (message = resOrm.err.messsage),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'User updated'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+
+export const UpdateLineup = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.UpdateLineup(req);
+    if (resOrm.err) {
+      (status = 'Failure'),
+        (errorcode = resOrm.err.code),
+        (message = resOrm.err.messsage),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'User updated'),
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }

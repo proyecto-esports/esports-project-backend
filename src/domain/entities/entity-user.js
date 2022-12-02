@@ -9,9 +9,10 @@ const user = (db) => {
       password: { type: String, required: true },
       role: { type: String, enum: ['user', 'admin'], required: true },
       image: { type: String },
+      players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],
       points: { type: Number },
-      lineup: [{ type: String }],
-      competition: { type: String },
+      lineup: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],
+      competitions: { type: mongoose.Schema.Types.ObjectId, ref: 'competition' },
     },
     {
       timestamps: true,
