@@ -1,3 +1,4 @@
+
 import bcrypt from 'bcrypt';
 import  jwt  from 'jsonwebtoken';
 
@@ -9,6 +10,7 @@ const db = conn.connMongo ;
 
 export const Create = async (req) => {
   console.log('jola');
+
   try {
     const newUser = new db.User(req.body);
     console.log(newUser);
@@ -28,13 +30,13 @@ export const Create = async (req) => {
     return await { err: { code: 123, message: err } };
   }
 };
-
 export const Login = async (req) => {
   try {
     const userByNickname = await db.User.findOne({
       nickname: req.body.nickname,
     });
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
+
     const userIndb = userByNickname || userByGmail;
     if (!userIndb) return LogDanger("Login credentials doesn't exist");
 
@@ -54,7 +56,6 @@ export const Login = async (req) => {
           expiresIn: '1h',
         }
       );
-
       userIndb.password = null;
 
       if (userIndb.role === 'admin') {
@@ -71,6 +72,7 @@ export const Login = async (req) => {
   }
 };
 
+
 export const GetAll = async () => {
   try {
     return await db.User.find();
@@ -79,7 +81,6 @@ export const GetAll = async () => {
     return await { err: { code: 123, message: err } };
   }
 };
-
 export const Update = async (req) => {
   try {
     const { id } = req.params;
@@ -100,12 +101,14 @@ export const Update = async (req) => {
   }
 };
 
+
 export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const deletedUser = await db.User.findByIdAndDelete(id);
     return deletedUser;
   } catch (err) {
+
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
@@ -115,6 +118,7 @@ export const Delete = async (req) => {
 };
 
 export const GetOne = async (req) => {
+
   try {
     const { id } = req.params;
     const user = await db.User.findById(id);
@@ -128,6 +132,7 @@ export const GetOne = async (req) => {
       );
   }
 };
+
 
 export const UpdatePlayers = async (req) => {
   try {

@@ -1,3 +1,4 @@
+
 import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
 import {ResponseService} from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
@@ -35,7 +36,6 @@ export const GetAll = async (req, res) => {
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
   }
 };
-
 export const Create = async (req, res) => {
   console.log('holi');
   console.log(req.body);
@@ -46,7 +46,6 @@ export const Create = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    console.log(req.body);
     const { username, nickname, gmail, password, role } = req.body;
     
     if (username && nickname && gmail && password && role) {

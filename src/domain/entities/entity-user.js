@@ -1,6 +1,8 @@
+
 import mongoose from 'mongoose';
 
 const user = (db) => {
+
   const userSchema = new db.Schema(
     {
       username: { type: String, required: true },
@@ -21,3 +23,4 @@ const user = (db) => {
   return db.model('user', userSchema);
 };
 export default user;
+
