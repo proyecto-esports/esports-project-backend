@@ -1,4 +1,5 @@
 import * as ormPlayer from '../orm/player-orm.js';
+import * as enum_ from '../../utils/enum.js';
 
 import { ResponseService, LogDanger } from './../../utils/magic.js';
 
@@ -10,7 +11,7 @@ export const Create = async (req, res) => {
   let statuscode = 0;
   let response = {};
   try {
-    let resOrm = await ormPlayer.Create();
+    let resOrm = await ormPlayer.Create(req);
     if (resOrm.err) {
       (status = 'Failure'),
         (errorcode = resOrm.err.code),
@@ -19,7 +20,7 @@ export const Create = async (req, res) => {
     } else {
       (message = 'Success Create player'),
         (data = resOrm),
-        (statuscode = data.length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
+        (statuscode = enum_.CODE_CREATED);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
