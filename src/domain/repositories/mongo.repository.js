@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import competition from '../entities/competicion-entity.js';
 
 import config from 'config-yml';
+
 import { LogInfo, LogDanger } from '../../utils/magic.js';
 
 dotenv.config();
@@ -18,7 +19,10 @@ if (config.db.mongodb && config.db.mongodb.length > 0) {
     });
     db[c.nameconn] = {};
     db[c.nameconn].conn = mongoose;
+
     db[c.nameconn].Competition = competition(mongoose);
+    db[c.nameconn].Player = player(mongoose);
+    db[c.nameconn].Bid = bid(mongoose);
   });
   LogInfo('Conectado a la base de datos 🚀');
 } else {
