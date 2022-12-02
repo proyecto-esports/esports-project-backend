@@ -1,5 +1,6 @@
 import express from 'express';
 
+import * as competition from '../domain/services/competicion-service.js';
 import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
 

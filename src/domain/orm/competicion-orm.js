@@ -1,11 +1,11 @@
-import db from '../repositories/mongo.repository.js';
+import { default as conn } from '../repositories/mongo.repository.js';
 import { LogDanger } from '../../utils/magic.js';
 
-const conn = conn.db.connMongo;
+const db = conn.connMongo;
 
 export const GetAll = async () => {
   try {
-    return await conn.Competicion.find();
+    return await db.Competition.find().populate('users players');
   } catch (error) {
     LogDanger('Cannot getAll competition', error);
     return await { error: { code: 123, message: error } };
@@ -14,9 +14,9 @@ export const GetAll = async () => {
 
 export const Create = async (req) => {
   try {
-    const data = await new conn.Competicion(req);
-    data.save();
-    return data;
+    const data = await new db.Competition(req);
+    const saveCompetition = await data.save();
+    return saveCompetition;
   } catch (error) {
     LogDanger('Cannot create competition', error);
     return await { error: { code: 123, message: error } };
@@ -26,21 +26,26 @@ export const Create = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const competicion = await conn.Competicion.findById(id);
-    if (!competicion) return LogDanger('Cannot get the competition');
-    return competicion;
+    const competition = await db.Competition.findById(id).populate(
+      'users players'
+    );
+    if (!competition) return LogDanger('Cannot get the competition');
+    return competition;
   } catch (error) {
     LogDanger('Cannot get the competition', error);
-    return await { error: { code: 123, message: error } };
+    return { error: { code: 123, message: error } };
   }
 };
 
 export const GetName = async (req) => {
   try {
     const { name } = req.params;
-    const competicion = await conn.Competicion.findOne({ name: name });
-    if (!competicion) return LogDanger('Cannot get the competition');
-    return competicion;
+    console.log(name);
+    const competition = await db.Competition.find({ name: name }).populate(
+      'users players'
+    );
+    if (!competition) return LogDanger('Cannot get the competition');
+    return competition;
   } catch (error) {
     LogDanger('Cannot get the competition', error);
     return await { error: { code: 123, message: error } };
@@ -50,13 +55,29 @@ export const GetName = async (req) => {
 export const Update = async (req) => {
   try {
     const { id } = req.params;
-    const newCompeticion = await new conn.Competicion(req.body);
-    newCompeticion._id = id;
-    const competicionUpdate = await conn.Competicion.findByIdAndUpdate(
+    const newCompetition = await new db.Competition(req.body);
+    newCompetition._id = id;
+    const competitionUpdate = await db.Competition.findByIdAndUpdate(
       id,
-      newCompeticion
+      newCompetition
     );
-    return competicionUpdate;
+    return competitionUpdate;
+  } catch (error) {
+    LogDanger('Cannot update the competition', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const UpdateUsers = async (req) => {
+  try {
+    const { competitionId } = req.params;
+    const { userId } = req.params;
+    const newCompetition = await db.Competition.findByIdAndUpdate(
+      competitionId,
+      { $push: { users: userId } },
+      { new: true }
+    );
+    return newCompetition;
   } catch (error) {
     LogDanger('Cannot update the competition', error);
     return await { error: { code: 123, message: error } };
@@ -66,10 +87,10 @@ export const Update = async (req) => {
 export const Delete = async (req) => {
   try {
     const { id } = req.params;
-    const deleteCompeticion = await conn.Competicion.findByIdAndDelete(id);
-    return deleteCompeticion;
+    const competition = await db.Competition.findByIdAndDelete(id);
+    return competition;
   } catch (error) {
-    LogDanger('Cannot delete the competition', error);
+    LogDanger('Cannot delete bid', error);
     return await { error: { code: 123, message: error } };
   }
 };

@@ -18,6 +18,8 @@ if (config.db.mongodb && config.db.mongodb.length > 0) {
     });
     db[c.nameconn] = {};
     db[c.nameconn].conn = mongoose;
+
+    db[c.nameconn].Competition = competition(mongoose);
     db[c.nameconn].Player = player(mongoose);
     db[c.nameconn].Bid = bid(mongoose);
   });
