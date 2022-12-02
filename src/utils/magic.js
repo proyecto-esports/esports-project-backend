@@ -1,4 +1,4 @@
-import * as enum_ from './enum';
+import * as enum_ from './enum.js';
 
 export const ResponseService = async (status, errorCode, message, data) => {
   return await {
@@ -10,6 +10,7 @@ export const ResponseService = async (status, errorCode, message, data) => {
     },
   };
 };
+
 
 export const LogSuccess = (msg) => {
   console.log(enum_.GREEN_LOG, msg);

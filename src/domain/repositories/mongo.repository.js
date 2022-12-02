@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 import config from 'config-yml';
-import magic from '../../utils/magic';
+import {LogInfo, LogDanger} from '../../utils/magic.js';
+import user from '../entities/entity-user.js'
+import bid from '../entities/entity-bid.js';
+import player from '../entities/player-entity.js';
+import competition from '../entities/competicion-entity.js'
 
 dotenv.config();
 
@@ -10,16 +14,20 @@ let db = {};
 
 if (config.db.mongodb && config.db.mongodb.length > 0) {
   config.db.mongodb.map((c) => {
-    mongoose.connect(env.process.MONGO_URI, {
+    mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     db[c.nameconn] = {};
     db[c.nameconn].conn = mongoose;
+    db[c.nameconn].User = user(mongoose);
+    db[c.nameconn].Competition = competition(mongoose);
+    db[c.nameconn].Player = player(mongoose);
+    db[c.nameconn].Bid = bid(mongoose);
   });
-  magic.LogInfo('Conectado a la base de datos 🚀');
+  LogInfo('Conectado a la base de datos 🚀');
 } else {
-  magic.LogDanger('No existe la base de datos 💥');
+  LogDanger('No existe la base de datos 💥');
 }
 
 export default db;

@@ -1,19 +1,23 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
-const conn = require('../repositories/mongo.repository');
-const magic = require('../../utils/magic');
+import bcrypt from 'bcrypt';
+import  jwt  from 'jsonwebtoken';
 
-const db = conn.db.connMongo;
+import {default as conn}  from '../repositories/mongo.repository.js';
+import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
+import { log } from 'config-yml';
 
-exports.Create = async (req) => {
+const db = conn.connMongo ;
+
+export const Create = async (req) => {
+  console.log('jola');
+
   try {
     const newUser = new db.User(req.body);
     console.log(newUser);
     const userNickname = await db.User.findOne({ nickname: newUser.nickname });
     const userGmail = await db.User.findOne({ gmail: newUser.gmail });
     const userExists = userNickname || userGmail;
-    if (userExists) return magic.LogDanger('That user already exists');
+    if (userExists) return LogDanger('That user already exists');
     newUser.password = bcrypt.hashSync(newUser.password, 6);
     if (req.file) {
       newUser.image = req.file.path;
@@ -22,68 +26,69 @@ exports.Create = async (req) => {
     const savedUser = await newUser.save();
     return savedUser;
   } catch (err) {
-    magic.LogDanger('User register failed', err);
+    LogDanger('User register failed', err);
     return await { err: { code: 123, message: err } };
   }
 };
-
-exports.Login = async (req) => {
+export const Login = async (req) => {
   try {
     const userByNickname = await db.User.findOne({
       nickname: req.body.nickname,
     });
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
-    const userInDB = userByNickname || userByGmail;
-    if (!userInDB) return magic.LogDanger("Login credentials doesn't exist");
 
-    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
-      console.log(userInDB);
+    const userIndb = userByNickname || userByGmail;
+    if (!userIndb) return LogDanger("Login credentials doesn't exist");
+
+    if (bcrypt.compareSync(req.body.password, userIndb.password)) {
+      console.log(userIndb);
       const userToken = jwt.sign(
-        { ...userInDB },
+        { ...userIndb },
         req.app.get('userSecretKey'),
         {
           expiresIn: '1h',
         }
       );
       const adminToken = jwt.sign(
-        { ...userInDB },
+        { ...userIndb },
         req.app.get('adminSecretKey'),
         {
           expiresIn: '1h',
         }
       );
+      userIndb.password = null;
 
-      userInDB.password = null;
-
-      if (userInDB.role === 'admin') {
-        return { user: userInDB, token: adminToken };
+      if (userIndb.role === 'admin') {
+        return { user: userIndb, token: adminToken };
       } else {
-        return { user: userInDB, token: userToken };
+        return { user: userIndb, token: userToken };
       }
     } else {
       return next('User password incorrect');
     }
   } catch (err) {
-    magic.LogDanger('User login failed', err);
+    LogDanger('User login failed', err);
     return await { err: { code: 123, message: err } };
   }
 };
 
-exports.GetAll = async () => {
+
+export const GetAll = async () => {
   try {
-    return await db.User.find().populate('department incidents');
+    return await db.User.find();
   } catch (err) {
-    magic.LogDanger('Cannot getAll users', err);
+    LogDanger('Cannot getAll users', err);
     return await { err: { code: 123, message: err } };
   }
 };
-
-exports.Update = async (req) => {
+export const Update = async (req) => {
   try {
     const { id } = req.params;
     const user = new db.User(req.body);
     user._id = id;
-    user.password = bcrypt.hashSync(user.password, 6);
+    if (user.password) {
+      user.password = bcrypt.hashSync(user.password, 6);
+    }
     const updatedUser = await db.User.findByIdAndUpdate(id, user);
     return updatedUser;
   } catch (err) {
@@ -91,27 +96,29 @@ exports.Update = async (req) => {
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
 
-exports.Delete = async (req) => {
+
+export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const deletedUser = await db.User.findByIdAndDelete(id);
     return deletedUser;
   } catch (err) {
-    console.log('err = ', err);
+
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
 
-exports.GetOne = async (req) => {
+export const GetOne = async (req) => {
+
   try {
     const { id } = req.params;
     const user = await db.User.findById(id);
@@ -121,22 +128,53 @@ exports.GetOne = async (req) => {
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
 
-exports.GetNickname = async (req) => {
+
+export const UpdatePlayers = async (req) => {
   try {
-    const { nickname } = req.params;
-    const user = await db.User.findOne({ nickname: nickname });
-    return user;
+    const { id } = req.params;
+    const{player} = req.body
+    const updatedPlantilla = await db.User.findByIdAndUpdate(id, 
+      { $push:{ players: player  }},
+      );
+    return updatedPlantilla;
   } catch (err) {
     console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await magic.ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdateLineup = async (req) => {
+  try {
+    const { id } = req.params;
+    const {line} = req.body;
+    console.log(line);
+    const userPlayers = await db.User.findById(id);
+    let savePlayers = userPlayers.players;
+    for (let i = 0; i < savePlayers.length; i++) {
+      if (line == savePlayers[i]) {
+        console.log("hola");
+      }
+    }
+    const updatedLineup = await db.User.findByIdAndUpdate(id, 
+      { $push:{ lineup: line  }},
+      );
+      return updatedLineup;
+    
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
       );
   }
 };
