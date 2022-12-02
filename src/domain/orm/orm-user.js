@@ -191,23 +191,16 @@ export const UpdateLineup = async (req) => {
 
 export const UpdatePlayersMoneyPoints = async (req) => {
   try {
-    console.log(req.body);
     const { id } = req.params;
     const{point} = req.body
     const{money} = req.body
-    console.log(money);
-    console.log(point);
     const playersUser = await db.User.findById(id);
-    console.log(playersUser);
     let userMoney = playersUser.money + (money)
     let userPoints = playersUser.points + (point)
-    console.log(userMoney);
     const updatePlayersMoneyPoints = await db.User.findByIdAndUpdate(id, 
       { $set:{ money: userMoney, points: userPoints  }},
       );
       return updatePlayersMoneyPoints
-    
-    
   } catch (err) {
     console.log('err = ', err);
     return res
