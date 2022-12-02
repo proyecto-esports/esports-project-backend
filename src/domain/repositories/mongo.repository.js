@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 
 import bid from '../entities/entity-bid.js';
 import config from 'config-yml';
-import { LogInfo, LogDanger } from '../../utils/magic.js';
-import player from '../entities/player-entity.js';
+
+import { LogDanger, LogInfo } from '../../utils/magic.js';
 
 dotenv.config();
 
