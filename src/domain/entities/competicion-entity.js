@@ -1,29 +1,27 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose';
 
-const competicion = (db) => {
-    const competicionSchema = new Schema(
+const competition = (db) => {
+  const competitionSchema = new db.Schema(
+    {
+      name: { type: String, required: true, unique: true },
+      users: [
         {
-            name: { type: String, required: true, unique: true},
-            users: [
-                {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "user",
-                    required: true
-                },
-            ],
-            players: [
-                {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "player",
-                    required: true
-                },
-            ],
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'user',
         },
+      ],
+      players: [
         {
-            timestamps: true,
-        }
-    );
-    return db.model("competicion", competicionSchema)
-}
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'player',
+        },
+      ],
+    },
+    {
+      timestamps: true,
+    }
+  );
+  return db.model('competition', competitionSchema);
+};
 
-export default competicion;
+export default competition;

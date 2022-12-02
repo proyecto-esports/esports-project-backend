@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-import bid from '../entities/entity-bid.js';
+import competition from '../entities/competicion-entity.js';
+
 import config from 'config-yml';
 
-import { LogDanger, LogInfo } from '../../utils/magic.js';
+import { LogInfo, LogDanger } from '../../utils/magic.js';
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ if (config.db.mongodb && config.db.mongodb.length > 0) {
     });
     db[c.nameconn] = {};
     db[c.nameconn].conn = mongoose;
+
+    db[c.nameconn].Competition = competition(mongoose);
     db[c.nameconn].Player = player(mongoose);
     db[c.nameconn].Bid = bid(mongoose);
   });
