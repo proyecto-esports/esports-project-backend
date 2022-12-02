@@ -151,19 +151,99 @@ export const UpdateLineup = async (req) => {
   try {
     const { id } = req.params;
     const {line} = req.body;
-    console.log(line);
-    const userPlayers = await db.User.findById(id);
-    let savePlayers = userPlayers.players;
-    for (let i = 0; i < savePlayers.length; i++) {
-      if (line == savePlayers[i]) {
-        console.log("hola");
+    const playersUser = await db.User.findById(id);
+    let savePlayers = playersUser.players;
+    let linePlayers = playersUser.lineup;
+
+      if (savePlayers.includes(line)) {
+        if (linePlayers.length) {
+          if (!linePlayers.includes(line)) {
+            const updatedLineup = await db.User.findByIdAndUpdate(id, 
+              { $push:{ lineup: line  }},
+              );
+              return updatedLineup;
+          } else{
+            LogDanger('That player already lineup')
+            return  await { err: { code: 123, message: 'That player already lineup' } }
+            
+          }
+        }else{
+          const updatedLineup = await db.User.findByIdAndUpdate(id, 
+            { $push:{ lineup: line  }},
+            );
+            return updatedLineup;
+        }
+      } else{
+        LogDanger('That player isnt you');
+        return  await { err: { code: 123, message: 'That player already lineup' } }
       }
-    }
-    const updatedLineup = await db.User.findByIdAndUpdate(id, 
-      { $push:{ lineup: line  }},
-      );
-      return updatedLineup;
+   
     
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdatePlayersMoneyPoints = async (req) => {
+  try {
+    console.log(req.body);
+    const { id } = req.params;
+    const{point} = req.body
+    const{money} = req.body
+    console.log(money);
+    console.log(point);
+    const playersUser = await db.User.findById(id);
+    console.log(playersUser);
+    let userMoney = playersUser.money + (money)
+    let userPoints = playersUser.points + (point)
+    console.log(userMoney);
+    const updatePlayersMoneyPoints = await db.User.findByIdAndUpdate(id, 
+      { $set:{ money: userMoney, points: userPoints  }},
+      );
+      return updatePlayersMoneyPoints
+    
+    
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdateCompetition = async (req) => {
+  try {
+    const { id } = req.params;
+    const{competition} = req.body
+    const updateCompetition = await db.User.findByIdAndUpdate(id, 
+      { $set:{ competitions: competition  }},
+      );
+    return updateCompetition;
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdateRole = async (req) => {
+  try {
+    const { id } = req.params;
+    const{role} = req.body
+    const updateRole = await db.User.findByIdAndUpdate(id, 
+      { $set:{ role: role  }},
+      );
+    return updateRole;
   } catch (err) {
     console.log('err = ', err);
     return res
