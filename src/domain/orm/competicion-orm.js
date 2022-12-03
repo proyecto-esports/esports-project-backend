@@ -96,8 +96,6 @@ export const UpdateMarket = async (req) => {
       });
 
     const competitionUsers = selectCompetition.users;
-    // const currentMarket = selectCompetition.market;
-    // const disabledPlayers = currentMarket;
     const disabledPlayers = selectCompetition.market;
     const allPlayers = await db.Player.find();
     competitionUsers.forEach((user) => {
