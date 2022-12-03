@@ -37,8 +37,6 @@ export const GetAll = async (req, res) => {
   }
 };
 export const Create = async (req, res) => {
-  console.log('holi');
-  console.log(req.body);
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -46,7 +44,7 @@ export const Create = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    const { username, nickname, gmail, password, role } = req.body;
+    const { username, nickname, gmail, password, role, image } = req.body;
     
     if (username && nickname && gmail && password && role) {
       let resOrm = await ormUser.Create(req);

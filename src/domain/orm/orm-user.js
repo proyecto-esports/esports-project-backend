@@ -9,8 +9,6 @@ import { log } from 'config-yml';
 const db = conn.connMongo ;
 
 export const Create = async (req) => {
-  console.log('jola');
-
   try {
     const newUser = new db.User(req.body);
     console.log(newUser);
