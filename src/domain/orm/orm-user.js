@@ -224,7 +224,7 @@ export const UpdatePlayersMoney = async (req) => {
     let userMoney = playersUser.money + (money)
 
     const updatePlayersMoney = await db.User.findByIdAndUpdate(id, 
-      { $set:{ money: userMoney, points: userPoints  }},
+      { $set:{ money: userMoney }},
       );
       return updatePlayersMoney
   } catch (err) {
