@@ -7,7 +7,7 @@ import * as player from './../domain/services/player-service.js';
 
 const router = express.Router();
 
-router.post('/users/register', user.Create);
+router.post('/users/register', upload.single('image'), user.Create);
 router.get('/users', user.GetAll);
 router.delete('/users/:id', user.Delete);
 router.patch('/users/:id', user.Update);

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const bid = (db) => {
   const bidSchema = new db.Schema(
     {
-      user: { type: mongoose.Schema.Types.ObjectId, required: true },
+      user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'user' },
       money: { type: Number, required: true },
     },
     {

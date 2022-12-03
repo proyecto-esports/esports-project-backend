@@ -44,9 +44,10 @@ export const Create = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    const { user, money } = req.body;
-    if (user && money) {
-      let resOrm = await ormBid.Create(req.body);
+    const { userId, money, playerId } = req.body;
+    console.log(req.body)
+    if (userId && money && playerId) {
+      let resOrm = await ormBid.Create(req);
       if (resOrm.error) {
         (status = 'Failure'),
           (errorcode = resOrm.error.code),
