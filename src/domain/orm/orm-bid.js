@@ -28,6 +28,7 @@ export const Create = async (req) => {
     const bid = await new db.Bid({
       user: userId,
       money: money,
+      player: playerId
     });
     const savedBid = await bid.save();
 
@@ -66,6 +67,34 @@ export const Update = async (req) => {
     return bidUpdate;
   } catch (error) {
     LogDanger('Cannot update the bid', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+
+
+export const RenewBid = async (req) => {
+  try {
+    const { id } = req.params;
+    const currentBid = await db.Bid.findById(id);
+    const returnMoney = currentBid.money
+    const bidOwner = currentBid.user
+    const biddedPlayer = currentBid.player
+    const infoPlayer = await db.Player.findByIdAndUpdate(biddedPlayer,
+      {$pull:{bids: id }}
+      )
+    const bid = await db.Bid.findByIdAndDelete(id)
+    const ownerUser = await db.User.findById(bidOwner)
+    if (ownerUser) {
+      let userMoney = ownerUser.money + (returnMoney)
+      const updateUserMoney = await db.User.findByIdAndUpdate(bidOwner, 
+        { $set:{ money: userMoney }},
+        );
+        return updateUserMoney
+    };
+    return bid;
+  } catch (error) {
+    LogDanger('Cannot delete bid', error);
     return await { error: { code: 123, message: error } };
   }
 };

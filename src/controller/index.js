@@ -20,6 +20,7 @@ router.put('/users/competition/:id', user.UpdateCompetition);
 router.put('/users/role/:id', user.UpdateRole);
 router.post('/bids', bid.Create);
 router.delete('/bids/:id', bid.Delete);
+router.delete('/bids/:id/renew', bid.RenewBid); //Esto lo utilizamos para devolver el dinero y borrar la apuesta
 router.post('/players/:id/bids', player.AddBid);
 router.post('/players', player.Create);
 router.get('/players', player.GetAll);

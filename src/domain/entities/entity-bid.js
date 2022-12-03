@@ -5,6 +5,7 @@ const bid = (db) => {
     {
       user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'user' },
       money: { type: Number, required: true },
+      player: {type: mongoose.Schema.Types.ObjectId, require: true, ref: 'player'}
     },
     {
       timestamps: true,
