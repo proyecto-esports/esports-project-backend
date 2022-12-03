@@ -106,8 +106,6 @@ export const UpdateMarket = async (req) => {
       });
     });
 
-    console.log(allPlayers);
-
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
 
@@ -118,13 +116,11 @@ export const UpdateMarket = async (req) => {
       return free;
     });
 
-    console.log(freePlayers);
-
     const randomMarket = freePlayers.sort(function () {
       return Math.random() - 0.5;
     });
 
-    console.log(randomMarket.slice(0, 10));
+    console.log('SLICE', randomMarket.slice(0, 10));
 
     console.log('randomMarket', randomMarket);
     if (randomMarket.length !== 0) {
