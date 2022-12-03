@@ -65,3 +65,18 @@ export const Update = async (req) => {
     return await { err: { code: 123, message: error } };
   }
 };
+
+export const AddBid = async (req) => {
+  try {
+    const { id } = req.params;
+    const addedBid = await db.Player.findByIdAndUpdate(
+      id,
+      { bid: req.body },
+      { new: true }
+    );
+    return addedBid;
+  } catch (error) {
+    LogDanger('User delete failed', error);
+    return await { err: { code: 123, message: error } };
+  }
+};
