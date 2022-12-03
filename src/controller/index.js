@@ -1,8 +1,6 @@
 import express from 'express';
 import upload from '../utils/middlewares/file.js';
-
 import * as user from '../domain/services/service-user.js';
-
 import * as competition from '../domain/services/competicion-service.js';
 import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
@@ -16,6 +14,10 @@ router.patch('/users/:id', user.Update);
 router.get('/users/:id', user.GetOne);
 router.put('/users/:id', user.UpdatePlayers);
 router.put('/users/lineup/:id', user.UpdateLineup);
+router.put('/users/points/:id', user.UpdatePlayersPoints);
+router.put('/users/money/:id', user.UpdatePlayersMoney);
+router.put('/users/competition/:id', user.UpdateCompetition);
+router.put('/users/role/:id', user.UpdateRole);
 router.post('/bids', bid.Create);
 router.delete('/bids/:id', bid.Delete);
 router.post('/players/:id/bids', player.AddBid);

@@ -1,7 +1,7 @@
 
 import bcrypt from 'bcrypt';
 import  jwt  from 'jsonwebtoken';
-
+import  deleteFile  from "../../utils/middlewares/delete-file.js";
 import {default as conn}  from '../repositories/mongo.repository.js';
 import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
 import { log } from 'config-yml';
@@ -9,8 +9,6 @@ import { log } from 'config-yml';
 const db = conn.connMongo ;
 
 export const Create = async (req) => {
-  console.log('jola');
-
   try {
     const newUser = new db.User(req.body);
     console.log(newUser);
@@ -30,6 +28,7 @@ export const Create = async (req) => {
     return await { err: { code: 123, message: err } };
   }
 };
+
 export const Login = async (req) => {
   try {
     const userByNickname = await db.User.findOne({
@@ -72,7 +71,6 @@ export const Login = async (req) => {
   }
 };
 
-
 export const GetAll = async () => {
   try {
     return await db.User.find();
@@ -81,6 +79,7 @@ export const GetAll = async () => {
     return await { err: { code: 123, message: err } };
   }
 };
+
 export const Update = async (req) => {
   try {
     const { id } = req.params;
@@ -101,10 +100,14 @@ export const Update = async (req) => {
   }
 };
 
-
 export const Delete = async (req) => {
   try {
     const { id } = req.params;
+    const userDel = await db.User.findById(id)
+    console.log(userDel.image);
+    if (userDel.image) {
+      deleteFile(userDel.image);
+    }
     const deletedUser = await db.User.findByIdAndDelete(id);
     return deletedUser;
   } catch (err) {
@@ -133,7 +136,6 @@ export const GetOne = async (req) => {
   }
 };
 
-
 export const UpdatePlayers = async (req) => {
   try {
     const { id } = req.params;
@@ -156,19 +158,111 @@ export const UpdateLineup = async (req) => {
   try {
     const { id } = req.params;
     const {line} = req.body;
-    console.log(line);
-    const userPlayers = await db.User.findById(id);
-    let savePlayers = userPlayers.players;
-    for (let i = 0; i < savePlayers.length; i++) {
-      if (line == savePlayers[i]) {
-        console.log("hola");
+    const playersUser = await db.User.findById(id);
+    let savePlayers = playersUser.players;
+    let linePlayers = playersUser.lineup;
+
+      if (savePlayers.includes(line)) {
+        if (linePlayers.length) {
+          if (!linePlayers.includes(line)) {
+            const updatedLineup = await db.User.findByIdAndUpdate(id, 
+              { $push:{ lineup: line  }},
+              );
+              return updatedLineup;
+          } else{
+            LogDanger('That player already lineup')
+            return  await { err: { code: 123, message: 'That player already lineup' } }
+            
+          }
+        }else{
+          const updatedLineup = await db.User.findByIdAndUpdate(id, 
+            { $push:{ lineup: line  }},
+            );
+            return updatedLineup;
+        }
+      } else{
+        LogDanger('That player isnt you');
+        return  await { err: { code: 123, message: 'That player already lineup' } }
       }
-    }
-    const updatedLineup = await db.User.findByIdAndUpdate(id, 
-      { $push:{ lineup: line  }},
-      );
-      return updatedLineup;
+   
     
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdatePlayersPoints = async (req) => {
+  try {
+    const { id } = req.params;
+    const{point} = req.body
+    const playersUser = await db.User.findById(id);
+    let userPoints = playersUser.points + (point)
+    const updatePlayersPoints = await db.User.findByIdAndUpdate(id, 
+      { $set:{ points: userPoints  }},
+      );
+      return updatePlayersPoints
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdatePlayersMoney = async (req) => {
+  try {
+    const { id } = req.params;
+    const{money} = req.body
+    const playersUser = await db.User.findById(id);
+    let userMoney = playersUser.money + (money)
+
+    const updatePlayersMoney = await db.User.findByIdAndUpdate(id, 
+      { $set:{ money: userMoney }},
+      );
+      return updatePlayersMoney
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdateCompetition = async (req) => {
+  try {
+    const { id } = req.params;
+    const{competition} = req.body
+    const updateCompetition = await db.User.findByIdAndUpdate(id, 
+      { $set:{ competitions: competition  }},
+      );
+    return updateCompetition;
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdateRole = async (req) => {
+  try {
+    const { id } = req.params;
+    const{role} = req.body
+    const updateRole = await db.User.findByIdAndUpdate(id, 
+      { $set:{ role: role  }},
+      );
+    return updateRole;
   } catch (err) {
     console.log('err = ', err);
     return res
