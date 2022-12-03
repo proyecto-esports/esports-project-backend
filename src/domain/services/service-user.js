@@ -303,7 +303,7 @@ export const UpdateLineup = async (req, res) => {
 };
 
 
-export const UpdatePlayersMoneyPoints = async (req, res) => {
+export const UpdatePlayersMoney = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -311,7 +311,38 @@ export const UpdatePlayersMoneyPoints = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.UpdatePlayersMoneyPoints(req);
+    let resOrm = await ormUser.UpdatePlayersMoney(req);
+    if (resOrm.err) {
+      (status = 'Failure'),
+        (errorcode = resOrm.err.code),
+        (message = 'That player already lineup' ),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'User updated'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+      );
+  }
+};
+
+export const UpdatePlayersPoints = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.UpdatePlayersPoints(req);
     if (resOrm.err) {
       (status = 'Failure'),
         (errorcode = resOrm.err.code),
