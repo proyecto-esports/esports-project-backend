@@ -151,7 +151,7 @@ export const Delete = async (req) => {
     const competition = await db.Competition.findByIdAndDelete(id);
     return competition;
   } catch (error) {
-    LogDanger('Cannot delete bid', error);
+    LogDanger('Cannot delete competition', error);
     return await { error: { code: 123, message: error } };
   }
 };

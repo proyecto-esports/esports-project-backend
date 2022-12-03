@@ -28,7 +28,7 @@ export const Create = async (req) => {
     const bid = await new db.Bid({
       user: userId,
       money: money,
-      player: playerId
+      player: playerId,
     });
     const savedBid = await bid.save();
 
@@ -47,51 +47,62 @@ export const Create = async (req) => {
   }
 };
 
-export const Delete = async (req) => {
+export const Update = async (req) => {
   try {
     const { id } = req.params;
-    const bid = await db.Bid.findByIdAndDelete(id);
-    return bid;
+    const { money } = req.body;
+    const oldBid = await db.Bid.findById(id);
+    const user = await db.User.findById(oldBid.user);
+
+    if (user.money + oldBid.money < money)
+      return {
+        error: {
+          code: 400,
+          message: "Your total money isn't enought to make that bid",
+        },
+      };
+
+    const updatedBid = await db.Bid.findByIdAndUpdate(id, { money: money });
+    const updatedUser = await db.User.findByIdAndUpdate(user._id, {
+      $inc: { money: oldBid.money - money },
+    });
+
+    return updatedBid;
+  } catch (error) {
+    LogDanger('Cannot update bid', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const DeleteAll = async (req) => {
+  try {
+    const removedBids = await db.collections.bids.drop();
+    return removedBids;
   } catch (error) {
     LogDanger('Cannot delete bid', error);
     return await { error: { code: 123, message: error } };
   }
 };
 
-export const Update = async (req) => {
-  try {
-    const { id } = req.params;
-    const newBid = await new db.Bid(req.body);
-    newBid._id = id;
-    const bidUpdate = await db.Bid.findByIdAndUpdate(id, newBid);
-    return bidUpdate;
-  } catch (error) {
-    LogDanger('Cannot update the bid', error);
-    return await { error: { code: 123, message: error } };
-  }
-};
-
-
-
 export const RenewBid = async (req) => {
   try {
     const { id } = req.params;
     const currentBid = await db.Bid.findById(id);
-    const returnMoney = currentBid.money
-    const bidOwner = currentBid.user
-    const biddedPlayer = currentBid.player
-    const infoPlayer = await db.Player.findByIdAndUpdate(biddedPlayer,
-      {$pull:{bids: id }}
-      )
-    const bid = await db.Bid.findByIdAndDelete(id)
-    const ownerUser = await db.User.findById(bidOwner)
+    const returnMoney = currentBid.money;
+    const bidOwner = currentBid.user;
+    const biddedPlayer = currentBid.player;
+    const infoPlayer = await db.Player.findByIdAndUpdate(biddedPlayer, {
+      $pull: { bids: id },
+    });
+    const bid = await db.Bid.findByIdAndDelete(id);
+    const ownerUser = await db.User.findById(bidOwner);
     if (ownerUser) {
-      let userMoney = ownerUser.money + (returnMoney)
-      const updateUserMoney = await db.User.findByIdAndUpdate(bidOwner, 
-        { $set:{ money: userMoney }},
-        );
-        return updateUserMoney
-    };
+      let userMoney = ownerUser.money + returnMoney;
+      const updateUserMoney = await db.User.findByIdAndUpdate(bidOwner, {
+        $set: { money: userMoney },
+      });
+      return updateUserMoney;
+    }
     return bid;
   } catch (error) {
     LogDanger('Cannot delete bid', error);
