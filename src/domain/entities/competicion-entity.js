@@ -10,7 +10,7 @@ const competition = (db) => {
           ref: 'user',
         },
       ],
-      players: [
+      market: [
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'player',
