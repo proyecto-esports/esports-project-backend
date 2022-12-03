@@ -18,19 +18,20 @@ router.put('/users/:id', user.UpdatePlayers);
 router.put('/users/lineup/:id', user.UpdateLineup);
 router.post('/bids', bid.Create);
 router.delete('/bids/:id', bid.Delete);
+router.post('/players/:id/bids', player.AddBid);
 router.post('/players', player.Create);
 router.get('/players', player.GetAll);
 router.get('/players/:id', player.GetOne);
 router.delete('/players/:id', player.Delete);
 router.patch('/players/:id', player.Update);
 
-router.post('/competition', competition.Create);
-router.get('/competition', competition.GetAll);
-router.get('/competition/:id', competition.GetOne);
-router.get('/competition/name/:name', competition.GetName);
-router.patch('/competition/:id', competition.Update);
-router.put('/competition/:id', competition.UpdateUsers);
-router.put('/competition/market/:id', competition.UpdateMarket);
-router.delete('/competition/:id', competition.Delete);
+router.post('/competitions', competition.Create);
+router.get('/competitions', competition.GetAll);
+router.get('/competitions/:id', competition.GetOne);
+router.get('/competitions/name/:name', competition.GetName);
+router.patch('/competitions/:id', competition.Update);
+router.put('/competitions/:id', competition.UpdateUsers);
+router.put('/competitions/:id/market', competition.UpdateMarket);
+router.delete('/competitions/:id', competition.Delete);
 
 export default router;

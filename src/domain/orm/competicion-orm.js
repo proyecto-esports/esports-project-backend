@@ -88,39 +88,63 @@ export const UpdateUsers = async (req) => {
 export const UpdateMarket = async (req) => {
   try {
     const { id } = req.params;
-    const { market } = req.body;
     const selectCompetition = await db.Competition.findById(id)
       .populate('market')
       .populate({
         path: 'users',
         populate: { path: 'players' },
       });
-    const competitionUsers = selectCompetition.users;
 
-    const currentMarket = selectCompetition.market;
-    const disabledPlayers = currentMarket;
+    const competitionUsers = selectCompetition.users;
+    // const currentMarket = selectCompetition.market;
+    // const disabledPlayers = currentMarket;
+    const disabledPlayers = selectCompetition.market;
     const allPlayers = await db.Player.find();
     competitionUsers.forEach((user) => {
-      user.players.map((player) => {
+      user.players.forEach((player) => {
         disabledPlayers.push(player);
       });
     });
-    console.log(selectCompetition);
-    const freePlayers = allPlayers.map((player) => {
-      let dontMatched;
+
+    console.log(allPlayers);
+
+    const freePlayers = allPlayers.filter((player) => {
+      let free = true;
+
       disabledPlayers.forEach((disabledPlayer) => {
-        if (disabledPlayer.nickname != player.nickname) {
-          dontMatched = player;
-        }
+        if (disabledPlayer.nickname === player.nickname) free = false;
       });
 
-      return dontMatched;
+      return free;
     });
-    // console.log('NORMAL', freePlayers);
 
-    freePlayers.sort(function () {
+    console.log(freePlayers);
+
+    const randomMarket = freePlayers.sort(function () {
       return Math.random() - 0.5;
     });
+
+    console.log(randomMarket.slice(0, 10));
+
+    console.log('randomMarket', randomMarket);
+    if (randomMarket.length !== 0) {
+      console.log('market');
+      const competitionUpdate = await db.Competition.findByIdAndUpdate(id, {
+        $set: {
+          market: randomMarket.slice(0, 1),
+        },
+      });
+      console.log('NO ROMPE');
+      console.log(competitionUpdate);
+      return competitionUpdate;
+    }
+    console.log('HOLA');
+    return await {
+      error: {
+        code: 500,
+        message: 'There are no available players on the market',
+      },
+    };
   } catch (error) {
     LogDanger('Cannot update the competition', error);
     return await { error: { code: 123, message: error } };

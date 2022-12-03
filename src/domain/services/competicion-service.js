@@ -226,12 +226,14 @@ export const UpdateMarket = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormCompetition.UpdateMarket(req);
-
+    cosole.log("resOrm", resOrm);
+    console.log(resOrm.error.code);
+    console.log(resOrm.error.message);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = resOrm.err.message),
-        (statuscode = enum_.CODE_BAD_REQUEST);
+        (message = resOrm.error.message),
+        (statuscode = enum_.CODE_NO_CONTENT);
     } else {
       (message = 'Sucess Update market of competition'),
         (data = resOrm),
