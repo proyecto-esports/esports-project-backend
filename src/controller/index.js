@@ -6,7 +6,6 @@ import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
 
 const router = express.Router();
-
 router.post('/users/register', upload.single('image'), user.Create);
 router.get('/users', user.GetAll);
 router.delete('/users/:id', user.Delete);
@@ -17,6 +16,7 @@ router.put('/users/lineup/:id', user.UpdateLineup);
 router.put('/users/points/:id', user.UpdatePlayersPoints);
 router.put('/users/money/:id', user.UpdatePlayersMoney);
 router.put('/users/competition/:id', user.UpdateCompetition);
+router.put('/users/inicialplayers/:id', user.InicialPlayers);
 router.put('/users/role/:id', user.UpdateRole);
 router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
@@ -30,7 +30,7 @@ router.get('/players', player.GetAll);
 router.get('/players/:id', player.GetOne);
 router.delete('/players/:id', player.Delete);
 router.patch('/players/:id', player.Update);
-
+router.put('/players/points', player.ChangePoints);
 router.post('/competitions', competition.Create);
 router.get('/competitions', competition.GetAll);
 router.get('/competitions/:id', competition.GetOne);

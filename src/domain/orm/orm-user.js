@@ -1,12 +1,16 @@
-
 import bcrypt from 'bcrypt';
-import  jwt  from 'jsonwebtoken';
-import  deleteFile  from "../../utils/middlewares/delete-file.js";
-import {default as conn}  from '../repositories/mongo.repository.js';
-import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
+import jwt from 'jsonwebtoken';
+import deleteFile from '../../utils/middlewares/delete-file.js';
+import { default as conn } from '../repositories/mongo.repository.js';
+import {
+  LogDanger,
+  LogInfo,
+  LogSuccess,
+  LogWarning,
+} from '../../utils/magic.js';
 import { log } from 'config-yml';
 
-const db = conn.connMongo ;
+const db = conn.connMongo;
 
 export const Create = async (req) => {
   try {
@@ -103,7 +107,7 @@ export const Update = async (req) => {
 export const Delete = async (req) => {
   try {
     const { id } = req.params;
-    const userDel = await db.User.findById(id)
+    const userDel = await db.User.findById(id);
     console.log(userDel.image);
     if (userDel.image) {
       deleteFile(userDel.image);
@@ -121,7 +125,6 @@ export const Delete = async (req) => {
 };
 
 export const GetOne = async (req) => {
-
   try {
     const { id } = req.params;
     const user = await db.User.findById(id);
@@ -139,10 +142,10 @@ export const GetOne = async (req) => {
 export const UpdatePlayers = async (req) => {
   try {
     const { id } = req.params;
-    const{player} = req.body
-    const updatedPlantilla = await db.User.findByIdAndUpdate(id, 
-      { $push:{ players: player  }},
-      );
+    const { player } = req.body;
+    const updatedPlantilla = await db.User.findByIdAndUpdate(id, {
+      $push: { players: player },
+    });
     return updatedPlantilla;
   } catch (error) {
     console.log('error = ', error);
@@ -157,11 +160,11 @@ export const UpdatePlayers = async (req) => {
 export const UpdateLineup = async (req) => {
   try {
     const { id } = req.params;
-    const {line} = req.body;
+    const { line } = req.body;
     const playersUser = await db.User.findById(id);
     let savePlayers = playersUser.players;
     let linePlayers = playersUser.lineup;
-
+    
       if (savePlayers.includes(line)) {
         if (linePlayers.length) {
           if (!linePlayers.includes(line)) {
@@ -199,7 +202,7 @@ export const UpdateLineup = async (req) => {
 export const UpdatePlayersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const{point} = req.body
+    const { point } = req.body;
     const playersUser = await db.User.findById(id);
     let userPoints = playersUser.points + (point)
     const updatePlayersPoints = await db.User.findByIdAndUpdate(id, 
@@ -219,9 +222,9 @@ export const UpdatePlayersPoints = async (req) => {
 export const UpdatePlayersMoney = async (req) => {
   try {
     const { id } = req.params;
-    const{money} = req.body
+    const { money } = req.body;
     const playersUser = await db.User.findById(id);
-    let userMoney = playersUser.money + (money)
+    let userMoney = playersUser.money + money;
 
     const updatePlayersMoney = await db.User.findByIdAndUpdate(id, 
       { $set:{ money: userMoney }},
@@ -240,10 +243,10 @@ export const UpdatePlayersMoney = async (req) => {
 export const UpdateCompetition = async (req) => {
   try {
     const { id } = req.params;
-    const{competition} = req.body
-    const updateCompetition = await db.User.findByIdAndUpdate(id, 
-      { $set:{ competitions: competition  }},
-      );
+    const { competition } = req.body;
+    const updateCompetition = await db.User.findByIdAndUpdate(id, {
+      $set: { competitions: competition },
+    });
     return updateCompetition;
   } catch (error) {
     console.log('error = ', error);
@@ -258,10 +261,10 @@ export const UpdateCompetition = async (req) => {
 export const UpdateRole = async (req) => {
   try {
     const { id } = req.params;
-    const{role} = req.body
-    const updateRole = await db.User.findByIdAndUpdate(id, 
-      { $set:{ role: role  }},
-      );
+    const { role } = req.body;
+    const updateRole = await db.User.findByIdAndUpdate(id, {
+      $set: { role: role },
+    });
     return updateRole;
   } catch (error) {
     console.log('error = ', error);
@@ -272,3 +275,48 @@ export const UpdateRole = async (req) => {
       );
   }
 };
+
+export const InicialPlayers = async (req) => {
+  try {
+    const { id } = req.params;
+    const selectUser = await db.User.findById(id).populate('competition');
+    const competitionId = selectUser.competition;
+    const allUser = await db.User.find();
+    const allPlayers = await db.Player.find();
+    const marketPlasyers = await db.Competition.findById(competitionId);
+    let disablePlayers = marketPlasyers.market;
+    allUser.forEach((oneUser) => {
+      if (oneUser.players) {
+        oneUser.players.forEach((player) => {
+          disablePlayers.push(player);
+        });
+      }
+    });
+    const freePlayers = allPlayers.filter((player) => {
+      let free = true;
+        if (disablePlayers.includes(player._id)) free = false;
+      return free;
+    });
+    const randomPlayers = freePlayers.sort(() => {
+      return Math.random() - 0.5;
+    });
+    if (randomPlayers.length) {
+      const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
+        $set: {
+          players: randomPlayers.slice(0, 5),
+        },
+      });
+      return playersUserUpdate;
+    }
+    return await {
+      error: {
+        code: 500,
+        message: 'There are no available players on the market',
+      },
+    };
+  } catch (error) {
+    LogDanger('Cannot update the competition', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+

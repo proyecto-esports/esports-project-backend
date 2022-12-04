@@ -65,3 +65,32 @@ export const Update = async (req) => {
     return await { error: { code: 123, message: error } };
   }
 };
+
+export const ChangePoints = async (req) => {
+  try {
+    const allPlayer = await db.Player.find();
+    let actualizados = []
+    allPlayer.forEach(async (player) => {
+      let kills = Math.floor(Math.random() * (50 + 1));
+      let deads = Math.floor(Math.random() * (14 + 1));
+      let asists = Math.floor(Math.random() * (50 + 1));
+      let dmg = Math.floor(Math.random() * (750 + 1));
+      let id = player._id;
+      const updatedPlayer = await db.Player.findByIdAndUpdate(id, {
+        stats: {
+          kills: kills,
+          deads: deads,
+          asists: asists,
+          dmg: dmg,
+        },
+        points: ((kills*100) - (deads*50) + (asists * 50) + dmg)
+      });
+      actualizados.push(updatedPlayer)
+      return updatedPlayer;
+    });
+    return actualizados
+  } catch (error) {
+    LogDanger('Player update failed', error);
+    return await { err: { code: 123, message: error } };
+  }
+};

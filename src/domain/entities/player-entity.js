@@ -5,6 +5,12 @@ const player = (db) => {
     nickname: { type: String, required: true },
     value: { type: Number, required: true },
     points: { type: Number, default: 0 },
+    stats:{
+      kills: { type: Number, default: 0 },
+      deads: { type: Number, default: 0 },
+      asists: { type: Number, default: 0 },
+      dmg: { type: Number, default: 0 },
+    },
     bids: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bid' }],
   });
 
