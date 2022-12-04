@@ -274,13 +274,9 @@ export const InicialPlayers = async (req) => {
         });
       }
     });
-    console.log('Adios',disablePlayers);
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
-
-  
         if (disablePlayers.includes(player._id)) free = false;
-     
       return free;
     });
     const randomPlayers = freePlayers.sort(() => {

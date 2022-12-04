@@ -80,3 +80,39 @@ export const AddBid = async (req) => {
     return await { err: { code: 123, message: error } };
   }
 };
+
+
+export const ChangePoints = async (req) => {
+  try {
+    const allPlayer = await db.Player.find()
+    allPlayer.forEach(player => {
+      let kills = Math.floor(Math.random() * (50 + 1)) ;
+      let deads = Math.floor(Math.random() * (14 + 1)) ;
+      let asists = Math.floor(Math.random() * (50 + 1)) ;
+      let dmg =  Math.floor(Math.random() * (750 + 1));
+      let allStats = {
+        kills: kills,
+        deads: deads,
+        asists: asists,
+        dmg:dmg
+      }
+      console.log(allStats);
+      const updatedPlayer = db.Player.findByIdAndUpdate(player._id, { $set:{
+        stats:{
+          kills: kills,
+          deads: deads,
+          asists: asists,
+          dmg:dmg
+        }
+      }}
+    ); 
+    return updatedPlayer;
+    });
+    
+   
+    
+  } catch (error) {
+    LogDanger('Player update failed', error);
+    return await { err: { code: 123, message: error } };
+  }
+};
