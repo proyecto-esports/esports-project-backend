@@ -22,7 +22,6 @@ router.put('/users/role/:id', user.UpdateRole);
 router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
 router.delete('/bids', bid.DeleteAll);
-router.delete('/bids/:id', bid.DeleteOne);
 router.patch('/bids/:id', bid.Update);
 router.delete('/bids/:id/renew', bid.RenewBid); //Esto lo utilizamos para devolver el dinero y borrar la apuesta
 router.post('/players/:id/bids', player.AddBid);
@@ -31,7 +30,7 @@ router.get('/players', player.GetAll);
 router.get('/players/:id', player.GetOne);
 router.delete('/players/:id', player.Delete);
 router.patch('/players/:id', player.Update);
-
+router.put('/players/points', player.ChangePoints);
 router.post('/competitions', competition.Create);
 router.get('/competitions', competition.GetAll);
 router.get('/competitions/:id', competition.GetOne);
