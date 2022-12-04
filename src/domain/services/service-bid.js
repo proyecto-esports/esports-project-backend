@@ -1,7 +1,7 @@
-import { ResponseService } from '../../utils/magic.js'
+import { ResponseService } from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
 import * as ormBid from '../../domain/orm/orm-bid.js';
-import { LogDanger } from '../../utils/magic.js'
+import { LogDanger } from '../../utils/magic.js';
 
 export const GetAll = async (req, res) => {
   let status = 'Success';
@@ -19,7 +19,7 @@ export const GetAll = async (req, res) => {
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Sucess GetAll bids'),
-      (data = resOrm),
+        (data = resOrm),
         (statuscode = data.length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
     }
     response = await ResponseService(status, errorcode, message, data);
@@ -45,7 +45,7 @@ export const Create = async (req, res) => {
     response = {};
   try {
     const { userId, money, playerId } = req.body;
-    console.log(req.body)
+    console.log(req.body);
     if (userId && money && playerId) {
       let resOrm = await ormBid.Create(req);
       if (resOrm.error) {
@@ -70,9 +70,7 @@ export const Create = async (req, res) => {
     LogDanger('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -85,6 +83,41 @@ export const DeleteAll = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormBid.DeleteAll(req);
+    console.log(resOrm);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Success delete all bids'),
+        (data = resOrm),
+        (statuscode =
+          Object.keys(data).length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    LogDanger('error: ', error);
+    response = await ResponseService(
+      'Failure',
+      enum_.CODE_BAD_REQUEST,
+      error,
+      ''
+    );
+    return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
+  }
+};
+
+export const Delete = async (req, res) => {
+  let status = 'Success';
+  let errorcode = '';
+  let message = '';
+  let data = '';
+  let statuscode = 0;
+  let response = {};
+  try {
+    let resOrm = await ormBid.Delete(req);
     console.log(resOrm);
     if (resOrm.error) {
       (status = 'Failure'),
@@ -109,7 +142,7 @@ export const DeleteAll = async (req, res) => {
     );
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
   }
-}; 
+};
 
 export const Update = async (req, res) => {
   let status = 'Success';
@@ -127,8 +160,9 @@ export const Update = async (req, res) => {
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Bids updated successfully'),
-      (data = resOrm),
-      (statuscode =  Object.keys(data).length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
+        (data = resOrm),
+        (statuscode =
+          Object.keys(data).length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
@@ -143,10 +177,6 @@ export const Update = async (req, res) => {
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
   }
 };
-
-
-
-
 
 export const RenewBid = async (req, res) => {
   let status = 'Success';
@@ -164,8 +194,9 @@ export const RenewBid = async (req, res) => {
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Success update bids'),
-      (data = resOrm),
-      (statuscode =  Object.keys(data).length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
+        (data = resOrm),
+        (statuscode =
+          Object.keys(data).length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
