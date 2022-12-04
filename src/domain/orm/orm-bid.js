@@ -19,28 +19,34 @@ export const Create = async (req) => {
     console.log(userId);
 
     const user = await db.User.findById(userId);
+    const player = await db.Player.findById(playerId);
 
     if (user.money < money)
       return { error: { code: 400, message: "You don't have enough money" } };
+    else if (player.value > money)
+      return {
+        error: {
+          code: 400,
+          message: `The minimun bid is ${player.value} e-coins.`,
+        },
+      };
+    else {
+      const bid = await new db.Bid({
+        user: userId,
+        money: money,
+        player: playerId,
+      });
+      const savedBid = await bid.save();
 
-    console.log('tengo money');
+      console.log(savedBid);
 
-    const bid = await new db.Bid({
-      user: userId,
-      money: money,
-      player: playerId,
-    });
-    const savedBid = await bid.save();
+      await db.User.findByIdAndUpdate(userId, { money: user.money - money });
 
-    console.log(savedBid);
-
-    await db.User.findByIdAndUpdate(userId, { money: user.money - money });
-
-    const bidInPlayer = await db.Player.findByIdAndUpdate(playerId, {
-      $push: { bids: savedBid._id },
-    });
-    console.log(bidInPlayer);
-    return bidInPlayer;
+      const bidInPlayer = await db.Player.findByIdAndUpdate(playerId, {
+        $push: { bids: savedBid._id },
+      });
+      return bidInPlayer;
+    }
   } catch (error) {
     LogDanger('Cannot create Bid', error);
     return await { error: { code: 123, message: error } };
@@ -70,7 +76,7 @@ export const Update = async (req) => {
         $inc: { money: oldBid.money - money },
       }
     );
-    
+
     return updatedBid;
   } catch (error) {
     LogDanger('Cannot update bid', error);
