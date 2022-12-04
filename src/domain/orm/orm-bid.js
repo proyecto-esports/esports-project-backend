@@ -27,7 +27,7 @@ export const Create = async (req) => {
       return {
         error: {
           code: 400,
-          message: `The minimum bid value is ${player.value} e-coins.`,
+          message: `The minimun bid is ${player.value} e-coins.`,
         },
       };
     else {
