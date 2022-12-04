@@ -13,9 +13,7 @@ const user = (db) => {
       players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],
       points: { type: Number },
       lineup: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],
-      competitions: [
-        { type: mongoose.Schema.Types.ObjectId, ref: 'competition' },
-      ],
+      competition:{ type: mongoose.Schema.Types.ObjectId, ref: 'competition' },
     },
     {
       timestamps: true,
