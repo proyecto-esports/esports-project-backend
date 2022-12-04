@@ -76,7 +76,7 @@ export const Create = async (req, res) => {
   }
 };
 
-export const Delete = async (req, res) => {
+export const DeleteAll = async (req, res) => {
   let status = 'Success';
   let errorcode = '';
   let message = '';
@@ -84,7 +84,7 @@ export const Delete = async (req, res) => {
   let statuscode = 0;
   let response = {};
   try {
-    let resOrm = await ormBid.Delete(req);
+    let resOrm = await ormBid.DeleteAll(req);
     console.log(resOrm);
     if (resOrm.error) {
       (status = 'Failure'),
@@ -126,7 +126,7 @@ export const Update = async (req, res) => {
         (message = resOrm.err.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
-      (message = 'Success update bids'),
+      (message = 'Bids updated successfully'),
       (data = resOrm),
       (statuscode =  Object.keys(data).length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
     }
