@@ -17,7 +17,7 @@ export const Create = async (req) => {
     return savedPlayer;
   } catch (error) {
     LogDanger('User register failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
 
@@ -27,7 +27,7 @@ export const GetAll = async (req) => {
     return playersInDB;
   } catch (error) {
     LogDanger('User GetAll failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
 
@@ -38,7 +38,7 @@ export const GetOne = async (req) => {
     return playerInDB;
   } catch (error) {
     LogDanger('User delete failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
 
@@ -49,7 +49,7 @@ export const Delete = async (req) => {
     return removedPlayer;
   } catch (error) {
     LogDanger('User delete failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
 
@@ -62,22 +62,7 @@ export const Update = async (req) => {
     return updatedPlayer;
   } catch (error) {
     LogDanger('User delete failed', error);
-    return await { err: { code: 123, message: error } };
-  }
-};
-
-export const AddBid = async (req) => {
-  try {
-    const { id } = req.params;
-    const addedBid = await db.Player.findByIdAndUpdate(
-      id,
-      { bid: req.body },
-      { new: true }
-    );
-    return addedBid;
-  } catch (error) {
-    LogDanger('User delete failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
 

@@ -14,9 +14,7 @@ export const GetAll = async () => {
 
 export const Create = async (req) => {
   try {
-    console.log('CREATE BID');
     const { userId, money, playerId } = req.body;
-    console.log(userId);
 
     const user = await db.User.findById(userId);
     const player = await db.Player.findById(playerId);
@@ -38,15 +36,17 @@ export const Create = async (req) => {
       });
       const savedBid = await bid.save();
 
-      console.log(savedBid);
-
       await db.User.findByIdAndUpdate(userId, { money: user.money - money });
 
-      const bidInPlayer = await db.Player.findByIdAndUpdate(playerId, {
+    const bidInPlayer = await db.Player.findByIdAndUpdate(
+      playerId,
+      {
         $push: { bids: savedBid._id },
-      });
-      return bidInPlayer;
-    }
+      },
+      { new: true }
+    );
+
+    return bidInPlayer;
   } catch (error) {
     LogDanger('Cannot create Bid', error);
     return await { error: { code: 123, message: error } };
@@ -68,14 +68,15 @@ export const Update = async (req) => {
         },
       };
 
-    const updatedBid = await db.Bid.findByIdAndUpdate(id, { money: money });
-    const updatedUser = await db.User.findByIdAndUpdate(
-      user._id,
-      { new: true },
-      {
-        $inc: { money: oldBid.money - money },
-      }
+    const updatedBid = await db.Bid.findByIdAndUpdate(
+      id,
+      { money: money },
+      { new: true }
     );
+    
+    await db.User.findByIdAndUpdate(user._id, {
+      $inc: { money: oldBid.money - money },
+    });
 
     return updatedBid;
   } catch (error) {
