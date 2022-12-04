@@ -70,7 +70,7 @@ export const Update = async (req) => {
         $inc: { money: oldBid.money - money },
       }
     );
-
+    
     return updatedBid;
   } catch (error) {
     LogDanger('Cannot update bid', error);

@@ -109,7 +109,7 @@ export const DeleteAll = async (req, res) => {
   }
 };
 
-export const Delete = async (req, res) => {
+export const DeleteAll = async (req, res) => {
   let status = 'Success';
   let errorcode = '';
   let message = '';
@@ -117,7 +117,7 @@ export const Delete = async (req, res) => {
   let statuscode = 0;
   let response = {};
   try {
-    let resOrm = await ormBid.Delete(req);
+    let resOrm = await ormBid.DeleteAll(req);
     console.log(resOrm);
     if (resOrm.error) {
       (status = 'Failure'),
