@@ -155,7 +155,6 @@ export const Update = async (req, res) => {
   let statuscode = 0;
   let response = {};
   try {
-    console.log(req.body);
     let resOrm = await ormCompetition.Update(req);
     if (resOrm.error) {
       (status = 'Failure'),
@@ -226,7 +225,7 @@ export const UpdateMarket = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormCompetition.UpdateMarket(req);
-    
+
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
