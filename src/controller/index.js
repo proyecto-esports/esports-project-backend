@@ -6,7 +6,6 @@ import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
 
 const router = express.Router();
-
 router.post('/users/register', upload.single('image'), user.Create);
 router.get('/users', user.GetAll);
 router.delete('/users/:id', user.Delete);

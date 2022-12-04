@@ -19,7 +19,7 @@ export const GetAll = async (req, res) => {
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Sucess GetAll bids'),
-        (data = resOrm),
+      (data = resOrm),
         (statuscode = data.length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT);
     }
     response = await ResponseService(status, errorcode, message, data);
@@ -143,6 +143,7 @@ export const Delete = async (req, res) => {
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
   }
 };
+
 export const Update = async (req, res) => {
   let status = 'Success';
   let errorcode = '';
@@ -210,3 +211,4 @@ export const RenewBid = async (req, res) => {
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
   }
 };
+

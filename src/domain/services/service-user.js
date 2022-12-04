@@ -302,7 +302,6 @@ export const UpdateLineup = async (req, res) => {
   }
 };
 
-
 export const UpdatePlayersMoney = async (req, res) => {
   let status = 'Success',
     errorcode = '',

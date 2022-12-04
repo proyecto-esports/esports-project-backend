@@ -116,3 +116,16 @@ export const Delete = async (req) => {
     return await { error: { code: 123, message: error } };
   }
 };
+
+export const Update = async (req) => {
+  try {
+      const { id } = req.params;
+      const newBid = await new db.Bid(req.body)
+      newBid._id = id;
+      const bidUpdate = await db.Bid.findByIdAndUpdate(id, newBid);
+      return bidUpdate;
+  } catch (error) {
+    LogDanger('Cannot update the bid', error)
+    return await { error: { code: 123, message: error } };
+  }
+};
