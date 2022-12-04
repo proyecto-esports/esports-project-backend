@@ -109,7 +109,6 @@ export const DeleteAll = async (req, res) => {
   }
 };
 
-
 export const Update = async (req, res) => {
   let status = 'Success';
   let errorcode = '';
