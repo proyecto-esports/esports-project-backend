@@ -63,10 +63,14 @@ export const Update = async (req) => {
       };
 
     const updatedBid = await db.Bid.findByIdAndUpdate(id, { money: money });
-    const updatedUser = await db.User.findByIdAndUpdate(user._id, {
-      $inc: { money: oldBid.money - money },
-    });
-
+    const updatedUser = await db.User.findByIdAndUpdate(
+      user._id,
+      { new: true },
+      {
+        $inc: { money: oldBid.money - money },
+      }
+    );
+    
     return updatedBid;
   } catch (error) {
     LogDanger('Cannot update bid', error);
@@ -76,34 +80,31 @@ export const Update = async (req) => {
 
 export const DeleteAll = async (req) => {
   try {
-    const removedBids = await db.collections.bids.drop();
-    return removedBids;
+    const allBids = await db.Bid.find();
+    allBids.forEach(async (bid) => {
+      // Retiro puja del jugador
+      await db.Player.findByIdAndUpdate(bid.player, {
+        $pull: { bids: bid._id },
+      });
+      // Devuelvo dinero al usuario
+      await db.User.findByIdAndUpdate(bid.user, { $inc: { money: bid.money } });
+    });
+    // Elimino todas las pujas
+    const removedBids = await db.Bid.collection.drop();
+    if (removedBids) return 'Collection deleted';
   } catch (error) {
     LogDanger('Cannot delete bid', error);
     return await { error: { code: 123, message: error } };
   }
 };
 
-export const RenewBid = async (req) => {
+export const Delete = async (req) => {
   try {
     const { id } = req.params;
-    const currentBid = await db.Bid.findById(id);
-    const returnMoney = currentBid.money;
-    const bidOwner = currentBid.user;
-    const biddedPlayer = currentBid.player;
-    const infoPlayer = await db.Player.findByIdAndUpdate(biddedPlayer, {
-      $pull: { bids: id },
-    });
-    const bid = await db.Bid.findByIdAndDelete(id);
-    const ownerUser = await db.User.findById(bidOwner);
-    if (ownerUser) {
-      let userMoney = ownerUser.money + returnMoney;
-      const updateUserMoney = await db.User.findByIdAndUpdate(bidOwner, {
-        $set: { money: userMoney },
-      });
-      return updateUserMoney;
-    }
-    return bid;
+    const bid = await db.Bid.findByIdAndUpdate(id);
+    await db.User.findByIdAndUpdate(bid.user, { $inc: { money: bid.money } });
+    const removedBid = await db.Bid.findByIdAndDelete(id);
+    return removedBid;
   } catch (error) {
     LogDanger('Cannot delete bid', error);
     return await { error: { code: 123, message: error } };
