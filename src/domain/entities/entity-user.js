@@ -9,7 +9,7 @@ const user = (db) => {
       password: { type: String, required: true },
       role: { type: String, enum: ['user', 'admin'], required: true },
       image: { type: String },
-      money: { type: Number, default: 10000 },
+      money: { type: Number, default: 1000000 },
       players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],
       points: { type: Number },
       lineup: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],

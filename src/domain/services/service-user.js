@@ -13,10 +13,10 @@ export const GetAll = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormUser.GetAll();
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.message),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Success GetAll users'),
@@ -25,12 +25,12 @@ export const GetAll = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    LogDanger('err: ', err);
+  } catch (error) {
+    LogDanger('error: ', error);
     response = await ResponseService(
       'Failure',
       enum_.CODE_BAD_REQUEST,
-      err,
+      error,
       ''
     );
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
@@ -48,10 +48,10 @@ export const Create = async (req, res) => {
     
     if (username && nickname && gmail && password && role) {
       let resOrm = await ormUser.Create(req);
-      if (resOrm.err) {
+      if (resOrm.error) {
         (status = 'Failure'),
-          (errorcode = resOrm.err.code),
-          (message = resOrm.err.messsage),
+          (errorcode = resOrm.error.code),
+          (message = resOrm.error.messsage),
           (statuscode = enum_.CODE_BAD_REQUEST);
       } else {
         (message = 'User created'),
@@ -66,12 +66,12 @@ export const Create = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -87,10 +87,10 @@ export const Login = async (req, res) => {
     const { nickname, gmail, password } = req.body;
     if ((nickname || gmail) && password) {
       let resOrm = await ormUser.Login(req);
-      if (resOrm.err) {
+      if (resOrm.error) {
         (status = 'Failure'),
-          (errorcode = resOrm.err.code),
-          (message = resOrm.err.messsage),
+          (errorcode = resOrm.error.code),
+          (message = resOrm.error.messsage),
           (statuscode = enum_.CODE_BAD_REQUEST);
       } else {
         (message = 'User logged'),
@@ -105,12 +105,12 @@ export const Login = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -124,10 +124,10 @@ export const Update = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.Update(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -136,12 +136,12 @@ export const Update = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -155,10 +155,10 @@ export const Delete = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.Delete(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User deleted'),
@@ -167,12 +167,12 @@ export const Delete = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -186,10 +186,10 @@ export const GetOne = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.GetOne(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User has been found'),
@@ -198,12 +198,12 @@ export const GetOne = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -217,10 +217,10 @@ export const GetNickname = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.GetNickname(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User has been found'),
@@ -229,12 +229,12 @@ export const GetNickname = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -248,10 +248,10 @@ export const UpdatePlayers = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.UpdatePlayers(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -260,12 +260,12 @@ export const UpdatePlayers = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -280,9 +280,9 @@ export const UpdateLineup = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.UpdateLineup(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
+        (errorcode = resOrm.error.code),
         (message = 'That player already lineup' ),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -292,12 +292,12 @@ export const UpdateLineup = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -312,9 +312,9 @@ export const UpdatePlayersMoney = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.UpdatePlayersMoney(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
+        (errorcode = resOrm.error.code),
         (message = 'That player already lineup' ),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -324,12 +324,12 @@ export const UpdatePlayersMoney = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -343,9 +343,9 @@ export const UpdatePlayersPoints = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.UpdatePlayersPoints(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
+        (errorcode = resOrm.error.code),
         (message = 'That player already lineup' ),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -355,12 +355,12 @@ export const UpdatePlayersPoints = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -374,10 +374,10 @@ export const UpdateCompetition = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.UpdateCompetition(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -386,12 +386,12 @@ export const UpdateCompetition = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };
@@ -406,10 +406,10 @@ export const UpdateRole = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.UpdateRole(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -418,12 +418,12 @@ export const UpdateRole = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', '')
+        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
       );
   }
 };

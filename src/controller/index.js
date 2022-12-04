@@ -37,7 +37,7 @@ router.get('/competitions/:id', competition.GetOne);
 router.get('/competitions/name/:name', competition.GetName);
 router.patch('/competitions/:id', competition.Update);
 router.put('/competitions/:id', competition.UpdateUsers);
-router.put('/competitions/:id/market', competition.UpdateMarket);
+router.patch('/competitions/:id/market', competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
 
 export default router;

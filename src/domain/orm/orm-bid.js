@@ -14,32 +14,31 @@ export const GetAll = async () => {
 
 export const Create = async (req) => {
   try {
-    console.log('CREATE BID');
     const { userId, money, playerId } = req.body;
-    console.log(userId);
 
     const user = await db.User.findById(userId);
 
     if (user.money < money)
       return { error: { code: 400, message: "You don't have enough money" } };
 
-    console.log('tengo money');
-
     const bid = await new db.Bid({
       user: userId,
       money: money,
       player: playerId,
     });
-    const savedBid = await bid.save();
 
-    console.log(savedBid);
+    const savedBid = await bid.save();
 
     await db.User.findByIdAndUpdate(userId, { money: user.money - money });
 
-    const bidInPlayer = await db.Player.findByIdAndUpdate(playerId, {
-      $push: { bids: savedBid._id },
-    });
-    console.log(bidInPlayer);
+    const bidInPlayer = await db.Player.findByIdAndUpdate(
+      playerId,
+      {
+        $push: { bids: savedBid._id },
+      },
+      { new: true }
+    );
+
     return bidInPlayer;
   } catch (error) {
     LogDanger('Cannot create Bid', error);
@@ -62,15 +61,15 @@ export const Update = async (req) => {
         },
       };
 
-    const updatedBid = await db.Bid.findByIdAndUpdate(id, { money: money });
-    const updatedUser = await db.User.findByIdAndUpdate(
-      user._id,
-      { new: true },
-      {
-        $inc: { money: oldBid.money - money },
-      }
+    const updatedBid = await db.Bid.findByIdAndUpdate(
+      id,
+      { money: money },
+      { new: true }
     );
-    
+    await db.User.findByIdAndUpdate(user._id, {
+      $inc: { money: oldBid.money - money },
+    });
+
     return updatedBid;
   } catch (error) {
     LogDanger('Cannot update bid', error);
