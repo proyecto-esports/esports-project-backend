@@ -35,12 +35,9 @@ export const Create = async (req) => {
 
 export const Login = async (req) => {
   try {
-    const userByNickname = await db.User.findOne({
-      nickname: req.body.nickname,
-    });
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
 
-    const userIndb = userByNickname || userByGmail;
+    const userIndb = userByGmail;
     if (!userIndb) return LogDanger("Login credentials doesn't exist");
 
     if (bcrypt.compareSync(req.body.password, userIndb.password)) {
