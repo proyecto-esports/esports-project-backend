@@ -9,13 +9,13 @@ import {
   LogWarning,
 } from '../../utils/magic.js';
 import { log } from 'config-yml';
+import setCookie from '../../utils/helpers/tokenManipulation.js';
 
 const db = conn.connMongo;
 
 export const Create = async (req) => {
   try {
     const newUser = new db.User(req.body);
-    console.log(newUser);
     const userNickname = await db.User.findOne({ nickname: newUser.nickname });
     const userGmail = await db.User.findOne({ gmail: newUser.gmail });
     const userExists = userNickname || userGmail;
@@ -33,39 +33,65 @@ export const Create = async (req) => {
   }
 };
 
-export const Login = async (req) => {
+export const Login = async (req, res) => {
   try {
     const userByNickname = await db.User.findOne({
       nickname: req.body.nickname,
     });
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
 
-    const userIndb = userByNickname || userByGmail;
-    if (!userIndb) return LogDanger("Login credentials doesn't exist");
+    const userInDB = userByNickname || userByGmail;
+    if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
-    if (bcrypt.compareSync(req.body.password, userIndb.password)) {
-      console.log(userIndb);
-      const userToken = jwt.sign(
-        { ...userIndb },
-        req.app.get('userSecretKey'),
-        {
-          expiresIn: '1h',
-        }
-      );
-      const adminToken = jwt.sign(
-        { ...userIndb },
-        req.app.get('adminSecretKey'),
-        {
-          expiresIn: '1h',
-        }
-      );
-      userIndb.password = null;
+    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
+      // console.log('CORRECT PASSWORD');
+      if (userInDB.role === 'user') {
+        const userToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('tokenExpireTime')),
+          }
+        );
+        // console.log('userToken', userToken);
+        const userRefreshToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userRefreshTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('refreshExpireTime')),
+          }
+        );
 
-      if (userIndb.role === 'admin') {
-        return { user: userIndb, token: adminToken };
-      } else {
-        return { user: userIndb, token: userToken };
+        userInDB.password = null;
+
+        setCookie(req, res, 'userRefreshToken', userRefreshToken);
+        // console.log('cookie ok');
+        return { user: userInDB, token: userToken };
       }
+
+      // console.log('userRefreshToken', userRefreshToken);
+      const adminToken = jwt.sign(
+        { ...userInDB },
+        req.app.get('adminTokenKey'),
+        {
+          expiresIn: parseInt(req.app.get('tokenExpireTime')),
+        }
+      );
+      // console.log('adminToken', adminToken);
+      const adminRefreshToken = jwt.sign(
+        { ...userInDB },
+        req.app.get('adminRefreshTokenKey'),
+        {
+          expiresIn: parseInt(req.app.get('refreshExpireTime')),
+        }
+      );
+      // console.log('adminRefreshToken', adminRefreshToken);
+
+      userInDB.password = null;
+
+      setCookie(req, res, 'adminRefreshToken', adminRefreshToken);
+      // console.log('cookie ok');
+      return { user: userInDB, token: adminToken };
     } else {
       return next('User password incorrect');
     }
@@ -98,9 +124,7 @@ export const Update = async (req) => {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -115,12 +139,9 @@ export const Delete = async (req) => {
     const deletedUser = await db.User.findByIdAndDelete(id);
     return deletedUser;
   } catch (error) {
-
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -133,9 +154,7 @@ export const GetOne = async (req) => {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -151,9 +170,7 @@ export const UpdatePlayers = async (req) => {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -164,38 +181,37 @@ export const UpdateLineup = async (req) => {
     const playersUser = await db.User.findById(id);
     let savePlayers = playersUser.players;
     let linePlayers = playersUser.lineup;
-    
-      if (savePlayers.includes(line)) {
-        if (linePlayers.length) {
-          if (!linePlayers.includes(line)) {
-            const updatedLineup = await db.User.findByIdAndUpdate(id, 
-              { $push:{ lineup: line  }},
-              );
-              return updatedLineup;
-          } else{
-            LogDanger('That player already lineup')
-            return  await { error: { code: 123, message: 'That player already lineup' } }
-            
-          }
-        }else{
-          const updatedLineup = await db.User.findByIdAndUpdate(id, 
-            { $push:{ lineup: line  }},
-            );
-            return updatedLineup;
+
+    if (savePlayers.includes(line)) {
+      if (linePlayers.length) {
+        if (!linePlayers.includes(line)) {
+          const updatedLineup = await db.User.findByIdAndUpdate(id, {
+            $push: { lineup: line },
+          });
+          return updatedLineup;
+        } else {
+          LogDanger('That player already lineup');
+          return await {
+            error: { code: 123, message: 'That player already lineup' },
+          };
         }
-      } else{
-        LogDanger('That player isnt you');
-        return  await { error: { code: 123, message: 'That player already lineup' } }
+      } else {
+        const updatedLineup = await db.User.findByIdAndUpdate(id, {
+          $push: { lineup: line },
+        });
+        return updatedLineup;
       }
-   
-    
+    } else {
+      LogDanger('That player isnt you');
+      return await {
+        error: { code: 123, message: 'That player already lineup' },
+      };
+    }
   } catch (error) {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -204,18 +220,16 @@ export const UpdatePlayersPoints = async (req) => {
     const { id } = req.params;
     const { point } = req.body;
     const playersUser = await db.User.findById(id);
-    let userPoints = playersUser.points + (point)
-    const updatePlayersPoints = await db.User.findByIdAndUpdate(id, 
-      { $set:{ points: userPoints  }},
-      );
-      return updatePlayersPoints
+    let userPoints = playersUser.points + point;
+    const updatePlayersPoints = await db.User.findByIdAndUpdate(id, {
+      $set: { points: userPoints },
+    });
+    return updatePlayersPoints;
   } catch (error) {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -226,17 +240,15 @@ export const UpdatePlayersMoney = async (req) => {
     const playersUser = await db.User.findById(id);
     let userMoney = playersUser.money + money;
 
-    const updatePlayersMoney = await db.User.findByIdAndUpdate(id, 
-      { $set:{ money: userMoney }},
-      );
-      return updatePlayersMoney
+    const updatePlayersMoney = await db.User.findByIdAndUpdate(id, {
+      $set: { money: userMoney },
+    });
+    return updatePlayersMoney;
   } catch (error) {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -252,9 +264,7 @@ export const UpdateCompetition = async (req) => {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -270,9 +280,7 @@ export const UpdateRole = async (req) => {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(
-        await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', '')
-      );
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -294,7 +302,7 @@ export const InicialPlayers = async (req) => {
     });
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
-        if (disablePlayers.includes(player._id)) free = false;
+      if (disablePlayers.includes(player._id)) free = false;
       return free;
     });
     const randomPlayers = freePlayers.sort(() => {
@@ -319,4 +327,3 @@ export const InicialPlayers = async (req) => {
     return await { error: { code: 123, message: error } };
   }
 };
-

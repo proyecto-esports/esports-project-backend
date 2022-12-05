@@ -4,10 +4,14 @@ import * as user from '../domain/services/service-user.js';
 import * as competition from '../domain/services/competicion-service.js';
 import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
+import isAdmin from '../utils/middlewares/admin-auth-middleware.js';
+import refreshToken from '../utils/helpers/refreshToken.js';
 
 const router = express.Router();
+router.post('/users/:id/refresh-token', refreshToken);
 router.post('/users/register', upload.single('image'), user.Create);
-router.get('/users', user.GetAll);
+router.post('/users/login', user.Login);
+router.get('/users', [isAdmin], user.GetAll);
 router.delete('/users/:id', user.Delete);
 router.patch('/users/:id', user.Update);
 router.get('/users/:id', user.GetOne);
