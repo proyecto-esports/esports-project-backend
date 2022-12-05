@@ -40,4 +40,7 @@ router.put('/competitions/:id', competition.UpdateUsers);
 router.patch('/competitions/:id/market', competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
 
+
+router.get("/google", (req, res) => res.send(req.user))
+
 export default router;
