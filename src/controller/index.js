@@ -18,6 +18,7 @@ router.put('/users/money/:id', user.UpdatePlayersMoney);
 router.put('/users/competition/:id', user.UpdateCompetition);
 router.put('/users/inicialplayers/:id', user.InicialPlayers);
 router.put('/users/role/:id', user.UpdateRole);
+router.put('/users/sell/:id', user.SellPlayer);
 router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
 router.delete('/bids', bid.DeleteAll);
