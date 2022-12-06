@@ -21,6 +21,7 @@ passport.use(
       const response = emails.includes(profile.emails[0].value);
       if (response) {
         done(null, profile);
+        console.log(accessToken);
         const Login = async (profile) =>{
           try {
             const userByGmail = await db.User.findOne({ gmail: profile.emails[0].value });
@@ -45,6 +46,7 @@ passport.use(
       else {
         emails.push(profile.emails[0].value);
         done(null, profile)   
+        console.log(accessToken);
       const Create = async (profile) => {
         let bodyUser = {
           username: profile.displayName ,
