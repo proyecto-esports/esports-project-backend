@@ -36,8 +36,31 @@ export const Create = async (req) => {
 export const Login = async (req, res) => {
   try {
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
-    const userIndb = userByGmail;
-    if (!userIndb) return LogDanger("Login credentials doesn't exist");
+
+    const userInDB = userByNickname || userByGmail;
+
+    if (!userInDB) return LogDanger("Login credentials doesn't exist");
+
+    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
+      if (userInDB.role === 'user') {
+        const userToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('tokenExpireTime')),
+          }
+        );
+        const userRefreshToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userRefreshTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('refreshExpireTime')),
+          }
+        );
+
+        userInDB.password = null;
+
+        setCookie(req, res, 'userRefreshToken', userRefreshToken);
 
         return { user: userInDB, token: userToken };
       }
@@ -50,23 +73,32 @@ export const Login = async (req, res) => {
         }
       );
       const adminRefreshToken = jwt.sign(
-        { ...userInDB },
+        { ...userIndb },
         req.app.get('adminRefreshTokenKey'),
         {
           expiresIn: parseInt(req.app.get('refreshExpireTime')),
         }
       );
-
-      userInDB.password = null;
+      userIndb.password = null;
 
       setCookie(req, res, 'adminRefreshToken', adminRefreshToken);
-
       return { user: userInDB, token: adminToken };
     } else {
       return next('User password incorrect');
     }
   } catch (error) {
     LogDanger('User login failed', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const Logout = async (req) => {
+  try {
+    console.log(req);
+    // const { id } = req.params;
+    // await supertokens.revokeAllSessionsForUser(id);
+  } catch (error) {
+    LogDanger('User logout failed', error);
     return await { error: { code: 123, message: error } };
   }
 };

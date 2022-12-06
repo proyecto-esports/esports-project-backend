@@ -1,5 +1,10 @@
-import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
-import {ResponseService} from '../../utils/magic.js';
+import {
+  LogDanger,
+  LogInfo,
+  LogSuccess,
+  LogWarning,
+} from '../../utils/magic.js';
+import { ResponseService } from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
 import * as ormUser from '../orm/orm-user.js';
 
@@ -99,6 +104,36 @@ export const Login = async (req, res) => {
         (errorcode = enum_.ERROR_REQUIRED_FIELD),
         (message = 'Required field incorrect'),
         (statuscode = enum_.CODE_BAD_REQUEST);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    console.log('error = ', error);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
+  }
+};
+
+export const Logout = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    console.log(req);
+    let resOrm = await ormUser.Logout(req);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Successful logout'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
