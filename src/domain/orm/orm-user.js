@@ -44,7 +44,6 @@ export const Login = async (req, res) => {
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
     if (bcrypt.compareSync(req.body.password, userInDB.password)) {
-      // console.log('CORRECT PASSWORD');
       if (userInDB.role === 'user') {
         const userToken = jwt.sign(
           { ...userInDB },
@@ -53,7 +52,6 @@ export const Login = async (req, res) => {
             expiresIn: parseInt(req.app.get('tokenExpireTime')),
           }
         );
-        // console.log('userToken', userToken);
         const userRefreshToken = jwt.sign(
           { ...userInDB },
           req.app.get('userRefreshTokenKey'),
@@ -65,11 +63,10 @@ export const Login = async (req, res) => {
         userInDB.password = null;
 
         setCookie(req, res, 'userRefreshToken', userRefreshToken);
-        // console.log('cookie ok');
+
         return { user: userInDB, token: userToken };
       }
 
-      // console.log('userRefreshToken', userRefreshToken);
       const adminToken = jwt.sign(
         { ...userInDB },
         req.app.get('adminTokenKey'),
@@ -77,7 +74,6 @@ export const Login = async (req, res) => {
           expiresIn: parseInt(req.app.get('tokenExpireTime')),
         }
       );
-      // console.log('adminToken', adminToken);
       const adminRefreshToken = jwt.sign(
         { ...userInDB },
         req.app.get('adminRefreshTokenKey'),
@@ -85,12 +81,11 @@ export const Login = async (req, res) => {
           expiresIn: parseInt(req.app.get('refreshExpireTime')),
         }
       );
-      // console.log('adminRefreshToken', adminRefreshToken);
 
       userInDB.password = null;
 
       setCookie(req, res, 'adminRefreshToken', adminRefreshToken);
-      // console.log('cookie ok');
+
       return { user: userInDB, token: adminToken };
     } else {
       return next('User password incorrect');
