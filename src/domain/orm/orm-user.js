@@ -9,13 +9,13 @@ import {
   LogWarning,
 } from '../../utils/magic.js';
 import { log } from 'config-yml';
+import setCookie from '../../utils/helpers/tokenManipulation.js';
 
 const db = conn.connMongo;
 
 export const Create = async (req) => {
   try {
     const newUser = new db.User(req.body);
-    console.log(newUser);
     const userNickname = await db.User.findOne({ nickname: newUser.nickname });
     const userGmail = await db.User.findOne({ gmail: newUser.gmail });
     const userExists = userNickname || userGmail;
@@ -33,36 +33,57 @@ export const Create = async (req) => {
   }
 };
 
-export const Login = async (req) => {
+export const Login = async (req, res) => {
   try {
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
 
-    const userIndb = userByGmail;
-    if (!userIndb) return LogDanger("Login credentials doesn't exist");
+    const userInDB = userByNickname || userByGmail;
+    if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
-    if (bcrypt.compareSync(req.body.password, userIndb.password)) {
-      console.log(userIndb);
-      const userToken = jwt.sign(
-        { ...userIndb },
-        req.app.get('userSecretKey'),
-        {
-          expiresIn: '1h',
-        }
-      );
-      const adminToken = jwt.sign(
-        { ...userIndb },
-        req.app.get('adminSecretKey'),
-        {
-          expiresIn: '1h',
-        }
-      );
-      userIndb.password = null;
+    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
+      if (userInDB.role === 'user') {
+        const userToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('tokenExpireTime')),
+          }
+        );
+        const userRefreshToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userRefreshTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('refreshExpireTime')),
+          }
+        );
 
-      if (userIndb.role === 'admin') {
-        return { user: userIndb, token: adminToken };
-      } else {
-        return { user: userIndb, token: userToken };
+        userInDB.password = null;
+
+        setCookie(req, res, 'userRefreshToken', userRefreshToken);
+
+        return { user: userInDB, token: userToken };
       }
+
+      const adminToken = jwt.sign(
+        { ...userInDB },
+        req.app.get('adminTokenKey'),
+        {
+          expiresIn: parseInt(req.app.get('tokenExpireTime')),
+        }
+      );
+      const adminRefreshToken = jwt.sign(
+        { ...userInDB },
+        req.app.get('adminRefreshTokenKey'),
+        {
+          expiresIn: parseInt(req.app.get('refreshExpireTime')),
+        }
+      );
+
+      userInDB.password = null;
+
+      setCookie(req, res, 'adminRefreshToken', adminRefreshToken);
+
+      return { user: userInDB, token: adminToken };
     } else {
       return next('User password incorrect');
     }

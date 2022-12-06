@@ -1,10 +1,5 @@
-import {
-  LogDanger,
-  LogInfo,
-  LogSuccess,
-  LogWarning,
-} from '../../utils/magic.js';
-import { ResponseService } from '../../utils/magic.js';
+import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
+import {ResponseService} from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
 import * as ormUser from '../orm/orm-user.js';
 
@@ -88,7 +83,7 @@ export const Login = async (req, res) => {
   try {
     const { nickname, gmail, password } = req.body;
     if ((nickname || gmail) && password) {
-      let resOrm = await ormUser.Login(req);
+      let resOrm = await ormUser.Login(req, res);
       if (resOrm.error) {
         (status = 'Failure'),
           (errorcode = resOrm.error.code),
