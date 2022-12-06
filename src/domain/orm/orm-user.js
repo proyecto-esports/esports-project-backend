@@ -36,30 +36,8 @@ export const Create = async (req) => {
 export const Login = async (req, res) => {
   try {
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
-
-    const userInDB = userByNickname || userByGmail;
-    if (!userInDB) return LogDanger("Login credentials doesn't exist");
-
-    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
-      if (userInDB.role === 'user') {
-        const userToken = jwt.sign(
-          { ...userInDB },
-          req.app.get('userTokenKey'),
-          {
-            expiresIn: parseInt(req.app.get('tokenExpireTime')),
-          }
-        );
-        const userRefreshToken = jwt.sign(
-          { ...userInDB },
-          req.app.get('userRefreshTokenKey'),
-          {
-            expiresIn: parseInt(req.app.get('refreshExpireTime')),
-          }
-        );
-
-        userInDB.password = null;
-
-        setCookie(req, res, 'userRefreshToken', userRefreshToken);
+    const userIndb = userByGmail;
+    if (!userIndb) return LogDanger("Login credentials doesn't exist");
 
         return { user: userInDB, token: userToken };
       }

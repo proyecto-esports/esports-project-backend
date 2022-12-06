@@ -12,9 +12,7 @@ dotenv.config();
 setUpCloudinary();
 const app = express();
 
-
-
-
+app.use(passport.initialize())
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
