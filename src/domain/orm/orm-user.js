@@ -35,9 +35,6 @@ export const Create = async (req) => {
 
 export const Login = async (req, res) => {
   try {
-    const userByNickname = await db.User.findOne({
-      nickname: req.body.nickname,
-    });
     const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
 
     const userInDB = userByNickname || userByGmail;
@@ -320,5 +317,33 @@ export const InicialPlayers = async (req) => {
   } catch (error) {
     LogDanger('Cannot update the competition', error);
     return await { error: { code: 123, message: error } };
+  }
+};
+
+export const SellPlayer = async (req) => {
+  try {
+    const { id } = req.params;
+    const { player } = req.body;
+
+    const getUser = await db.User.findById(id).populate('players');
+    const playerToSell = await db.Player.findById(player);
+    const playerToSellValue = playerToSell.value;
+    const reducedValue = playerToSellValue * 0.7;
+    const newUserMoney = getUser.money + reducedValue;
+
+    const updatePlayersAndMoney = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $pull: { players: player },
+        $set: { money: newUserMoney },
+      },
+      { new: true }
+    );
+    return updatePlayersAndMoney;
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
