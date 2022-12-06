@@ -4,7 +4,7 @@ const user = (db) => {
   const userSchema = new db.Schema(
     {
       username: { type: String, required: true },
-      nickname: { type: String, required: true, unique: true },
+      nickname: { type: String, required: true},
       gmail: { type: String, required: true, unique: true },
       password: { type: String, required: true },
       role: { type: String, enum: ['user', 'admin'], required: true },

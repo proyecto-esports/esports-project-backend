@@ -5,10 +5,16 @@ import cookieParser from 'cookie-parser';
 
 import setUpCloudinary from '../utils/helpers/cloudinary.js';
 import routes from '../routes/index.js';
+import passport from 'passport';
+
 
 dotenv.config();
 setUpCloudinary();
 const app = express();
+
+
+
+
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
