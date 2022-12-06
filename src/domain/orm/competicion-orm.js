@@ -96,8 +96,10 @@ export const UpdateMarket = async (req) => {
       });
 
     const competitionUsers = selectCompetition.users;
+    // DESACTIVO JUGADORES ACTUALES
     const disabledPlayers = selectCompetition.market;
 
+    // ASIGNO JUGADORES A GANADORES
     disabledPlayers.forEach((player) => {
       if (player.bids.length) {
         player.bids.sort((bidA, bidB) => {
@@ -128,6 +130,7 @@ export const UpdateMarket = async (req) => {
       }
     });
 
+    // DESACTIVO JUGADORES EN POSESIÓN
     const allPlayers = await db.Player.find();
     competitionUsers.forEach((user) => {
       user.players.forEach((player) => {
