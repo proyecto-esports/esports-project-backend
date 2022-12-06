@@ -29,6 +29,7 @@
     "cloudinary": "^1.32.0",
     "compression": "^1.7.4",
     "config-yml": "^0.10.3",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "esm": "^3.2.25",

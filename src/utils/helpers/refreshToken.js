@@ -11,24 +11,29 @@ const refreshToken = async (req, res) => {
     const { id } = req.params;
     const user = await db.User.findById(id);
 
+    // USER role
     if (user.role === 'user') {
       try {
+        // Verificamos si el Refresh Token ha expirado o es válido
         await jwt.verify(
           req.cookies.userRefreshToken,
-          req.app.get('userRefreshToken')
+          req.app.get('userRefreshTokenKey'),
+          // Controlador de errores que aporta información más detallada que el Catch
+          (error) => error && console.log(error)
         );
-
-        const newToken = jwt.sign({ ...user }, req.app.get('userToken'), {
+        // Generamos nuevos tokens de ambos tipos
+        const newToken = jwt.sign({ ...user }, req.app.get('userTokenKey'), {
           expiresIn: parseInt(req.app.get('tokenExpireTime')),
         });
         const newRefreshToken = jwt.sign(
           { ...user },
-          req.app.get('userRefreshToken'),
+          req.app.get('userRefreshTokenKey'),
           { expiresIn: parseInt(req.app.get('refreshExpireTime')) }
         );
-
+        // Guardamos el Refresh Roken en una cookie con el ajuste de httpOnly,
+        // evitando así el robo mediante scripts desde el lado del cliente
         setCookie(req, res, 'userRefreshToken', newRefreshToken);
-
+        // Retornamos el nuevo Token de acceso al Frontend en la respuesta
         return res.status(200).send({ token: newToken });
       } catch (error) {
         LogDanger('User refresh token has expired or has been revoked', error);
@@ -36,26 +41,25 @@ const refreshToken = async (req, res) => {
       }
     }
 
+    // ADMIN role
     try {
-      console.log('TRY');
-      // console.log(req[[Symbol(kHeaders)]].cookie);
-      console.log(req.cookies.adminRefreshToken);
       await jwt.verify(
         req.cookies.adminRefreshToken,
-        req.app.get('adminRefreshToken')
+        req.app.get('adminRefreshTokenKey'),
+        (error) => error && console.log(error)
       );
-      console.log('verified');
-      const newToken = jwt.sign({ ...user }, req.app.get('adminToken'), {
+
+      const newToken = jwt.sign({ ...user }, req.app.get('adminTokenKey'), {
         expiresIn: parseInt(req.app.get('tokenExpireTime')),
       });
       const newRefreshToken = jwt.sign(
         { ...user },
-        req.app.get('adminRefreshToken'),
+        req.app.get('adminRefreshTokenKey'),
         { expiresIn: parseInt(req.app.get('refreshExpireTime')) }
       );
-      console.log('newRefreshToken', newRefreshToken);
+
       setCookie(req, res, 'adminRefreshToken', newRefreshToken);
-      console.log('cookie saved');
+
       return res.status(200).send({ token: newToken });
     } catch (error) {
       LogDanger('Admin refresh token has expired or has been revoked', error);
