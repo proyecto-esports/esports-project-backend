@@ -123,8 +123,7 @@ export const Logout = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    console.log(req);
-    let resOrm = await ormUser.Logout(req);
+    let resOrm = await ormUser.Logout(req, res);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),

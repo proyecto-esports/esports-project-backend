@@ -35,9 +35,7 @@ export const Create = async (req) => {
 
 export const Login = async (req, res) => {
   try {
-    const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
-
-    const userInDB = userByNickname || userByGmail;
+    const userInDB = await db.User.findOne({ gmail: req.body.gmail });
 
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
@@ -72,16 +70,19 @@ export const Login = async (req, res) => {
           expiresIn: parseInt(req.app.get('tokenExpireTime')),
         }
       );
+
       const adminRefreshToken = jwt.sign(
-        { ...userIndb },
+        { ...userInDB },
         req.app.get('adminRefreshTokenKey'),
         {
           expiresIn: parseInt(req.app.get('refreshExpireTime')),
         }
       );
-      userIndb.password = null;
+
+      userInDB.password = null;
 
       setCookie(req, res, 'adminRefreshToken', adminRefreshToken);
+
       return { user: userInDB, token: adminToken };
     } else {
       return next('User password incorrect');
@@ -92,11 +93,11 @@ export const Login = async (req, res) => {
   }
 };
 
-export const Logout = async (req) => {
+export const Logout = async (req, res) => {
   try {
-    console.log(req);
-    // const { id } = req.params;
-    // await supertokens.revokeAllSessionsForUser(id);
+    console.log(res.cookies)
+    res.clearCookie("")
+    return updatedUser;
   } catch (error) {
     LogDanger('User logout failed', error);
     return await { error: { code: 123, message: error } };
