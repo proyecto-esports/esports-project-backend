@@ -95,9 +95,21 @@ export const Login = async (req, res) => {
 
 export const Logout = async (req, res) => {
   try {
-    console.log(res.cookies)
-    res.clearCookie("")
-    return updatedUser;
+    try {
+      // res.cookie('adminRefreshToken', null);
+      console.log(res);
+      res.clearCookie("adminRefreshToken")
+      console.log(res)
+    } catch (error) {
+      console.log(error);
+      try {
+        res.cookie('userRefreshToken', null);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    return 'User logout successfully';
   } catch (error) {
     LogDanger('User logout failed', error);
     return await { error: { code: 123, message: error } };
