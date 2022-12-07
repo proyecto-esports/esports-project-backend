@@ -16,16 +16,17 @@ const db = conn.connMongo;
 export const Create = async (req) => {
   try {
     const newUser = new db.User(req.body);
-    const userNickname = await db.User.findOne({ nickname: newUser.nickname });
-    const userGmail = await db.User.findOne({ gmail: newUser.gmail });
-    const userExists = userNickname || userGmail;
+
+    const userExists = await db.User.findOne({ gmail: newUser.gmail });
     if (userExists) return LogDanger('That user already exists');
+
     newUser.password = bcrypt.hashSync(newUser.password, 6);
+
     if (req.file) {
       newUser.image = req.file.path;
     }
 
-    const savedUser = await newUser.save();
+    const savedUser = await newUser.save()
     return savedUser;
   } catch (error) {
     LogDanger('User register failed', error);
@@ -35,9 +36,30 @@ export const Create = async (req) => {
 
 export const Login = async (req, res) => {
   try {
-    const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
-    const userIndb = userByGmail;
-    if (!userIndb) return LogDanger("Login credentials doesn't exist");
+    const userInDB = await db.User.findOne({ gmail: req.body.gmail });
+
+    if (!userInDB) return LogDanger("Login credentials doesn't exist");
+
+    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
+      if (userInDB.role === 'user') {
+        const userToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('tokenExpireTime')),
+          }
+        );
+        const userRefreshToken = jwt.sign(
+          { ...userInDB },
+          req.app.get('userRefreshTokenKey'),
+          {
+            expiresIn: parseInt(req.app.get('refreshExpireTime')),
+          }
+        );
+
+        userInDB.password = null;
+
+        setCookie(req, res, 'userRefreshToken', userRefreshToken);
 
         return { user: userInDB, token: userToken };
       }
@@ -49,6 +71,7 @@ export const Login = async (req, res) => {
           expiresIn: parseInt(req.app.get('tokenExpireTime')),
         }
       );
+
       const adminRefreshToken = jwt.sign(
         { ...userInDB },
         req.app.get('adminRefreshTokenKey'),
@@ -67,6 +90,26 @@ export const Login = async (req, res) => {
     }
   } catch (error) {
     LogDanger('User login failed', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const Logout = async (req, res) => {
+  try {
+    try {
+      res.clearCookie('adminRefreshToken');
+    } catch (error) {
+      console.log(error);
+      try {
+        res.cookie('userRefreshToken', null);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    return 'User logout successfully';
+  } catch (error) {
+    LogDanger('User logout failed', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -102,7 +145,6 @@ export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const userDel = await db.User.findById(id);
-    console.log(userDel.image);
     if (userDel.image) {
       deleteFile(userDel.image);
     }

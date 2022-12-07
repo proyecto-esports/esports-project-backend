@@ -11,6 +11,7 @@ const router = express.Router();
 router.post('/users/:id/refresh-token', refreshToken);
 router.post('/users/register', upload.single('image'), user.Create);
 router.post('/users/login', user.Login);
+router.post('/users/logout', user.Logout);
 router.get('/users', [isAdmin], user.GetAll);
 router.delete('/users/:id', user.Delete);
 router.patch('/users/:id', user.Update);
@@ -44,5 +45,5 @@ router.patch('/competitions/:id', competition.Update);
 router.put('/competitions/:id', competition.UpdateUsers);
 router.patch('/competitions/:id/market', competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
-router.get("/google", (req, res) => res.send(req.user))
+router.get('/google', (req, res) => res.send(req.user));
 export default router;

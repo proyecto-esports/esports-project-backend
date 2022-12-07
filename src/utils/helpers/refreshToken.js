@@ -11,6 +11,8 @@ const refreshToken = async (req, res) => {
     const { id } = req.params;
     const user = await db.User.findById(id);
 
+    console.log('cookies', req.cookies);
+
     // USER role
     if (user.role === 'user') {
       try {

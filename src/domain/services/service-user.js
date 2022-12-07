@@ -1,5 +1,10 @@
-import {LogDanger, LogInfo, LogSuccess, LogWarning} from '../../utils/magic.js';
-import {ResponseService} from '../../utils/magic.js';
+import {
+  LogDanger,
+  LogInfo,
+  LogSuccess,
+  LogWarning,
+} from '../../utils/magic.js';
+import { ResponseService } from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
 import * as ormUser from '../orm/orm-user.js';
 
@@ -43,9 +48,9 @@ export const Create = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    const { username, nickname, gmail, password, role, image } = req.body;
+    const { username, gmail, password} = req.body;
 
-    if (username && nickname && gmail && password && role) {
+    if (username && gmail && password) {
       let resOrm = await ormUser.Create(req);
       if (resOrm.error) {
         (status = 'Failure'),
@@ -81,8 +86,8 @@ export const Login = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    const { nickname, gmail, password } = req.body;
-    if ((nickname || gmail) && password) {
+    const { gmail, password } = req.body;
+    if (gmail && password) {
       let resOrm = await ormUser.Login(req, res);
       if (resOrm.error) {
         (status = 'Failure'),
@@ -99,6 +104,35 @@ export const Login = async (req, res) => {
         (errorcode = enum_.ERROR_REQUIRED_FIELD),
         (message = 'Required field incorrect'),
         (statuscode = enum_.CODE_BAD_REQUEST);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    console.log('error = ', error);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
+  }
+};
+
+export const Logout = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.Logout(req, res);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Successful logout'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
@@ -177,35 +211,6 @@ export const GetOne = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.GetOne(req);
-    if (resOrm.error) {
-      (status = 'Failure'),
-        (errorcode = resOrm.error.code),
-        (message = resOrm.error.messsage),
-        (statuscode = enum_.CODE_BAD_REQUEST);
-    } else {
-      (message = 'User has been found'),
-        (data = resOrm),
-        (statuscode = enum_.CODE_CREATED);
-    }
-    response = await ResponseService(status, errorcode, message, data);
-    return res.status(statuscode).send(response);
-  } catch (error) {
-    console.log('error = ', error);
-    return res
-      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
-  }
-};
-
-export const GetNickname = async (req, res) => {
-  let status = 'Success',
-    errorcode = '',
-    message = '',
-    data = '',
-    statuscode = 0,
-    response = {};
-  try {
-    let resOrm = await ormUser.GetNickname(req);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
