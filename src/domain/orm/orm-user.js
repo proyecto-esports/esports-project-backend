@@ -15,17 +15,26 @@ const db = conn.connMongo;
 
 export const Create = async (req) => {
   try {
+    console.log('REQ', req);
     const newUser = new db.User(req.body);
-    const userNickname = await db.User.findOne({ nickname: newUser.nickname });
-    const userGmail = await db.User.findOne({ gmail: newUser.gmail });
-    const userExists = userNickname || userGmail;
+    const userExists = await db.User.findOne({ gmail: newUser.gmail });
     if (userExists) return LogDanger('That user already exists');
     newUser.password = bcrypt.hashSync(newUser.password, 6);
     if (req.file) {
+      console.log('there is image');
       newUser.image = req.file.path;
     }
+    console.log('newUser', newUser);
 
-    const savedUser = await newUser.save();
+    try {
+      var savedUser = await newUser.save(function (error) {
+        error && console.log("ERROR", error);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    // console.log('savedUser', savedUser);
     return savedUser;
   } catch (error) {
     LogDanger('User register failed', error);
@@ -98,8 +107,8 @@ export const Logout = async (req, res) => {
     try {
       // res.cookie('adminRefreshToken', null);
       console.log(res);
-      res.clearCookie("adminRefreshToken")
-      console.log(res)
+      res.clearCookie('adminRefreshToken');
+      console.log(res);
     } catch (error) {
       console.log(error);
       try {

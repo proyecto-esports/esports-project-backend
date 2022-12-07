@@ -4,10 +4,9 @@ const user = (db) => {
   const userSchema = new db.Schema(
     {
       username: { type: String, required: true },
-      nickname: { type: String },
       gmail: { type: String, required: true, unique: true },
       password: { type: String, required: true },
-      role: { type: String, enum: ['user', 'admin'], required: true },
+      role: { type: String, enum: ['user', 'admin'], default: 'user' },
       image: { type: String },
       money: { type: Number, default: 1000000 },
       players: [{ type: mongoose.Schema.Types.ObjectId, ref: 'player' }],

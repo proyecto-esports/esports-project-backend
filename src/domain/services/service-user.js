@@ -50,7 +50,7 @@ export const Create = async (req, res) => {
   try {
     const { username, nickname, gmail, password, role, image } = req.body;
 
-    if (username && nickname && gmail && password && role) {
+    if (username && gmail && password) {
       let resOrm = await ormUser.Create(req);
       if (resOrm.error) {
         (status = 'Failure'),
