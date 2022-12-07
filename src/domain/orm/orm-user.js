@@ -15,26 +15,19 @@ const db = conn.connMongo;
 
 export const Create = async (req) => {
   try {
-    console.log('REQ', req);
     const newUser = new db.User(req.body);
+
     const userExists = await db.User.findOne({ gmail: newUser.gmail });
     if (userExists) return LogDanger('That user already exists');
+
     newUser.password = bcrypt.hashSync(newUser.password, 6);
+    
     if (req.file) {
       console.log('there is image');
       newUser.image = req.file.path;
     }
-    console.log('newUser', newUser);
 
-    try {
-      var savedUser = await newUser.save(function (error) {
-        error && console.log("ERROR", error);
-      });
-    } catch (error) {
-      console.log(error);
-    }
-
-    // console.log('savedUser', savedUser);
+    const savedUser = await newUser.save()
     return savedUser;
   } catch (error) {
     LogDanger('User register failed', error);

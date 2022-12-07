@@ -49,7 +49,7 @@ export const Create = async (req) => {
       };
 
     const userInMarket = usersInMarket.find(
-      (userMarket) => userMarket.nickname === userId
+      (userMarket) => userMarket._id === userId
     );
     if (!userInMarket)
       return { error: { code: 400, message: 'The user is not in the market' } };
