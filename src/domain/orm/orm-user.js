@@ -21,9 +21,8 @@ export const Create = async (req) => {
     if (userExists) return LogDanger('That user already exists');
 
     newUser.password = bcrypt.hashSync(newUser.password, 6);
-    
+
     if (req.file) {
-      console.log('there is image');
       newUser.image = req.file.path;
     }
 
@@ -98,10 +97,7 @@ export const Login = async (req, res) => {
 export const Logout = async (req, res) => {
   try {
     try {
-      // res.cookie('adminRefreshToken', null);
-      console.log(res);
       res.clearCookie('adminRefreshToken');
-      console.log(res);
     } catch (error) {
       console.log(error);
       try {
@@ -149,7 +145,6 @@ export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const userDel = await db.User.findById(id);
-    console.log(userDel.image);
     if (userDel.image) {
       deleteFile(userDel.image);
     }
