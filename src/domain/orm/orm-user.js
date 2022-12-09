@@ -123,7 +123,7 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id);
+    const user = await db.User.findById(id).populate('players lineup competition');
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -323,6 +323,53 @@ export const SellPlayer = async (req) => {
       { new: true }
     );
     return updatePlayersAndMoney;
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const changePlayerLineup = async (req) => {
+  try {
+    const { id } = req.params;
+    const { currentPlayer, newPlayer } = req.body;
+    const user = await db.User.findById(id).populate('players');
+
+    const lineupUser = user.lineup;
+
+    if (lineupUser.length) {
+      if (!lineupUser.includes(newPlayer)) {
+        const addPlayer = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $push: { lineup: newPlayer },
+            // $pull: { lineup: currentPlayer },
+          },
+          { new: true }
+        );
+        const removePlayer = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $pull: { lineup: currentPlayer },
+          },
+          { new: true }
+        );
+        console.log(removePlayer);
+        return removePlayer;
+      } else {
+        LogDanger('That player already lineup');
+        return await {
+          error: { code: 123, message: 'That player already lineup' },
+        };
+      }
+    } else {
+      LogDanger('Dont have players in your lineup');
+      return await {
+        error: { code: 123, message: 'That player already lineup' },
+      };
+    }
   } catch (err) {
     console.log('err = ', err);
     return res

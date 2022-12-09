@@ -15,14 +15,16 @@ export const GetAll = async () => {
 export const Create = async (req) => {
   try {
     const { userId, money, playerId } = req.body;
-
+   
     const user = await db.User.findById(userId).populate({
       path: 'competition',
       populate: { path: 'users market' },
-    });
+    }); 
+   
     const player = await db.Player.findById(playerId);
-
+ 
     const competition = user.competition;
+    
     if (!competition)
       return {
         error: { code: 400, message: 'The user is not in the competition' },
@@ -49,10 +51,10 @@ export const Create = async (req) => {
       };
 
     const userInMarket = usersInMarket.find(
-      (userMarket) => userMarket._id === userId
+      (userMarket) => userMarket._id.toString() === userId.toString()
     );
     if (!userInMarket)
-      return { error: { code: 400, message: 'The user is not in the market' } };
+      return { error: { code: 400, message: 'The user is not in the competition' } };
     else if (user.money < money)
       return { error: { code: 400, message: "You don't have enough money" } };
     else if (player.value > money)
