@@ -231,7 +231,7 @@ export const GetOne = async (req, res) => {
   }
 };
 
-export const UpdatePlayers = async (req, res) => {
+export const UpdateUsersPlayers = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -239,7 +239,7 @@ export const UpdatePlayers = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.UpdatePlayers(req);
+    let resOrm = await ormUser.UpdateUsersPlayers(req);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
@@ -318,7 +318,7 @@ export const UpdatePlayersMoney = async (req, res) => {
   }
 };
 
-export const UpdatePlayersPoints = async (req, res) => {
+export const UpdateUsersPoints = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -326,7 +326,7 @@ export const UpdatePlayersPoints = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.UpdatePlayersPoints(req);
+    let resOrm = await ormUser.UpdateUsersPoints(req);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
