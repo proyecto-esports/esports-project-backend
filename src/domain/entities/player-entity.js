@@ -5,6 +5,7 @@ const player = (db) => {
     nickname: { type: String, required: true },
     value: { type: Number, required: true },
     points: { type: Number, default: 0 },
+    image: { type: String},
     stats:{
       kills: { type: Number, default: 0 },
       deads: { type: Number, default: 0 },

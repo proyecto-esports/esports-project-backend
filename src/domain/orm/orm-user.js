@@ -160,7 +160,7 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id);
+    const user = await db.User.findById(id).populate('players lineup competition');
     return user;
   } catch (error) {
     console.log('error = ', error);
