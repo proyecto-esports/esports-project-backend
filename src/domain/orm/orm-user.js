@@ -133,7 +133,7 @@ export const GetOne = async (req) => {
   }
 };
 
-export const UpdatePlayers = async (req) => {
+export const UpdateUsersPlayers = async (req) => {
   try {
     const { id } = req.params;
     const { player } = req.body;
@@ -190,16 +190,28 @@ export const UpdateLineup = async (req) => {
   }
 };
 
-export const UpdatePlayersPoints = async (req) => {
+export const UpdateUsersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const { point } = req.body;
-    const playersUser = await db.User.findById(id);
-    let userPoints = playersUser.points + point;
-    const updatePlayersPoints = await db.User.findByIdAndUpdate(id, {
-      $set: { points: userPoints },
-    });
-    return updatePlayersPoints;
+    const users = await db.Competition.findById(id)
+
+    
+       users.users.forEach((user)=> {
+      const extracLine = async () => {
+      let totalPoints = 0  
+      const line = await db.User.findById(user).populate('lineup')
+      line.lineup.forEach((player)=> {
+        totalPoints += player.points
+      })
+      const updatepoints = await db.User.findByIdAndUpdate(user, {
+        $set: { points: totalPoints },
+      });
+      return updatepoints
+    }
+    
+        extracLine()
+    })
+    return "Funsiona"
   } catch (error) {
     console.log('error = ', error);
     return res
