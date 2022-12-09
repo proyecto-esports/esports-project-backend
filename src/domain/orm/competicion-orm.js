@@ -1,6 +1,8 @@
 import { default as conn } from '../repositories/mongo.repository.js';
 import { LogDanger } from '../../utils/magic.js';
 import { diskStorage } from 'multer';
+import { generateTokens } from '../../utils/helpers/generateTokens.js';
+import setCookie from './../../utils/helpers/tokenManipulation.js';
 
 const db = conn.connMongo;
 
@@ -13,11 +15,35 @@ export const GetAll = async () => {
   }
 };
 
-export const Create = async (req) => {
+export const Create = async (req, res) => {
   try {
-    const data = await new db.Competition(req);
-    const saveCompetition = await data.save();
-    return saveCompetition;
+    req.body.users = JSON.parse(req.body.users);
+
+    const userId = req.body.users[0];
+
+    const user = await db.User.findById(userId);
+
+    const { accessToken, refreshToken } = generateTokens(req, 'admin', user);
+
+    const userUpdated = await db.User.findByIdAndUpdate(
+      userId,
+      {
+        role: 'admin',
+      },
+      { new: true }
+    );
+
+    setCookie(req, res, 'refreshToken', refreshToken);
+
+    const competition = await new db.Competition(req.body);
+
+    const savedCompetition = await competition.save();
+
+    return {
+      competition: savedCompetition,
+      user: userUpdated,
+      accessToken: accessToken,
+    };
   } catch (error) {
     LogDanger('Cannot create competition', error);
     return await { error: { code: 123, message: error } };

@@ -15,7 +15,7 @@ const isAdmin = (req, res, next) => {
   const jwtStringify = splits[1];
 
   try {
-    var token = jwt.verify(jwtStringify, req.app.get('adminTokenKey'));
+    var token = jwt.verify(jwtStringify, req.app.get('adminAccessKey'));
   } catch (err) {
     return res.json(setError(401, 'Token invalid'));
   }

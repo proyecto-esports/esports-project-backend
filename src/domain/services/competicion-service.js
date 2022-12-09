@@ -46,7 +46,7 @@ export const Create = async (req, res) => {
   try {
     const { name } = req.body;
     if (name) {
-      let resOrm = await ormCompetition.Create(req.body);
+      let resOrm = await ormCompetition.Create(req, res);
 
       if (resOrm.error) {
         (status = 'Failure'),
@@ -57,7 +57,6 @@ export const Create = async (req, res) => {
         (message = 'Sucess create competitions'),
           (data = resOrm),
           (statuscode = enum_.CODE_CREATED);
-        console.log(data);
       }
     } else {
       (status = 'Failure'),
