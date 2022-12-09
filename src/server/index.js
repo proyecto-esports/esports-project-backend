@@ -20,19 +20,19 @@ app.use(express.urlencoded({ limit: '1mb', extended: true }));
 app.use(cookieParser());
 
 const {
-  JWT_TOKEN_KEY_USER,
-  JWT_REFRESH_KEY_USER,
-  JWT_TOKEN_KEY_ADMIN,
-  JWT_REFRESH_KEY_ADMIN,
-  TOKEN_EXPIRE_TIME,
+  JWT_USER_ACCESS_KEY,
+  JWT_USER_REFRESH_KEY,
+  JWT_ADMIN_TOKEN_KEY,
+  JWT_ADMIN_REFRESH_KEY,
+  ACCESS_EXPIRE_TIME,
   REFRESH_EXPIRE_TIME,
 } = process.env;
 
-app.set('userTokenKey', JWT_TOKEN_KEY_USER);
-app.set('userRefreshTokenKey', JWT_REFRESH_KEY_USER);
-app.set('adminTokenKey', JWT_TOKEN_KEY_ADMIN);
-app.set('adminRefreshTokenKey', JWT_REFRESH_KEY_ADMIN);
-app.set('tokenExpireTime', TOKEN_EXPIRE_TIME);
+app.set('userAccessKey', JWT_USER_ACCESS_KEY);
+app.set('userRefreshKey', JWT_USER_REFRESH_KEY);
+app.set('adminAccessKey', JWT_ADMIN_TOKEN_KEY);
+app.set('adminRefreshKey', JWT_ADMIN_REFRESH_KEY);
+app.set('accessExpireTime', ACCESS_EXPIRE_TIME);
 app.set('refreshExpireTime', REFRESH_EXPIRE_TIME);
 
 routes(app);

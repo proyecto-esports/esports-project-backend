@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 const competition = (db) => {
   const competitionSchema = new db.Schema(
     {
+      game: { type: String, enum: ['Valorant'], required: true },
+      competition: { type: String, enum: ['League'], required: true },
       name: { type: String, required: true, unique: true },
       users: [
         {

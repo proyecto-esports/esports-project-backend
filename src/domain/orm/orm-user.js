@@ -10,6 +10,7 @@ import {
 } from '../../utils/magic.js';
 import { log } from 'config-yml';
 import setCookie from '../../utils/helpers/tokenManipulation.js';
+import { generateTokens } from './../../utils/helpers/generateTokens.js';
 
 const db = conn.connMongo;
 
@@ -26,7 +27,7 @@ export const Create = async (req) => {
       newUser.image = req.file.path;
     }
 
-    const savedUser = await newUser.save()
+    const savedUser = await newUser.save();
     return savedUser;
   } catch (error) {
     LogDanger('User register failed', error);
@@ -41,50 +42,17 @@ export const Login = async (req, res) => {
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
     if (bcrypt.compareSync(req.body.password, userInDB.password)) {
-      if (userInDB.role === 'user') {
-        const userToken = jwt.sign(
-          { ...userInDB },
-          req.app.get('userTokenKey'),
-          {
-            expiresIn: parseInt(req.app.get('tokenExpireTime')),
-          }
-        );
-        const userRefreshToken = jwt.sign(
-          { ...userInDB },
-          req.app.get('userRefreshTokenKey'),
-          {
-            expiresIn: parseInt(req.app.get('refreshExpireTime')),
-          }
-        );
-
-        userInDB.password = null;
-
-        setCookie(req, res, 'userRefreshToken', userRefreshToken);
-
-        return { user: userInDB, token: userToken };
-      }
-
-      const adminToken = jwt.sign(
-        { ...userInDB },
-        req.app.get('adminTokenKey'),
-        {
-          expiresIn: parseInt(req.app.get('tokenExpireTime')),
-        }
-      );
-
-      const adminRefreshToken = jwt.sign(
-        { ...userInDB },
-        req.app.get('adminRefreshTokenKey'),
-        {
-          expiresIn: parseInt(req.app.get('refreshExpireTime')),
-        }
+      const { accessToken, refreshToken } = generateTokens(
+        req,
+        userInDB.role,
+        userInDB
       );
 
       userInDB.password = null;
 
-      setCookie(req, res, 'adminRefreshToken', adminRefreshToken);
+      setCookie(req, res, 'refreshToken', accessToken);
 
-      return { user: userInDB, token: adminToken };
+      return { user: userInDB, token: accessToken };
     } else {
       return next('User password incorrect');
     }
@@ -97,14 +65,9 @@ export const Login = async (req, res) => {
 export const Logout = async (req, res) => {
   try {
     try {
-      res.clearCookie('adminRefreshToken');
+      res.cookie('refreshToken', null);
     } catch (error) {
       console.log(error);
-      try {
-        res.cookie('userRefreshToken', null);
-      } catch (error) {
-        console.log(error);
-      }
     }
 
     return 'User logout successfully';

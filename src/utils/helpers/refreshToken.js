@@ -11,64 +11,26 @@ const refreshToken = async (req, res) => {
     const { id } = req.params;
     const user = await db.User.findById(id);
 
-    console.log('cookies', req.cookies);
-
-    // USER role
-    if (user.role === 'user') {
-      try {
-        // Verificamos si el Refresh Token ha expirado o es válido
-        await jwt.verify(
-          req.cookies.userRefreshToken,
-          req.app.get('userRefreshTokenKey'),
-          // Controlador de errores que aporta información más detallada que el Catch
-          (error) => error && console.log(error)
-        );
-        // Generamos nuevos tokens de ambos tipos
-        const newToken = jwt.sign({ ...user }, req.app.get('userTokenKey'), {
-          expiresIn: parseInt(req.app.get('tokenExpireTime')),
-        });
-        const newRefreshToken = jwt.sign(
-          { ...user },
-          req.app.get('userRefreshTokenKey'),
-          { expiresIn: parseInt(req.app.get('refreshExpireTime')) }
-        );
-        // Guardamos el Refresh Roken en una cookie con el ajuste de httpOnly,
-        // evitando así el robo mediante scripts desde el lado del cliente
-        setCookie(req, res, 'userRefreshToken', newRefreshToken);
-        // Retornamos el nuevo Token de acceso al Frontend en la respuesta
-        return res.status(200).send({ token: newToken });
-      } catch (error) {
-        LogDanger('User refresh token has expired or has been revoked', error);
-        return await { error: { code: 123, message: error } };
-      }
-    }
-
-    // ADMIN role
-    try {
-      await jwt.verify(
-        req.cookies.adminRefreshToken,
-        req.app.get('adminRefreshTokenKey'),
-        (error) => error && console.log(error)
-      );
-
-      const newToken = jwt.sign({ ...user }, req.app.get('adminTokenKey'), {
-        expiresIn: parseInt(req.app.get('tokenExpireTime')),
-      });
-      const newRefreshToken = jwt.sign(
-        { ...user },
-        req.app.get('adminRefreshTokenKey'),
-        { expiresIn: parseInt(req.app.get('refreshExpireTime')) }
-      );
-
-      setCookie(req, res, 'adminRefreshToken', newRefreshToken);
-
-      return res.status(200).send({ token: newToken });
-    } catch (error) {
-      LogDanger('Admin refresh token has expired or has been revoked', error);
-      return await { error: { code: 123, message: error } };
-    }
+    // Verificamos si el Refresh Token ha expirado o es válido
+    await jwt.verify(
+      req.cookies.refreshToken,
+      req.app.get(user.role === 'user' ? 'userRefreshKey' : 'adminRefreshKey'),
+      // Controlador de errores que aporta información más detallada que el Catch
+      (error) => error && console.log(error)
+    );
+    // Generamos nuevos tokens de ambos tipos
+    const { accessToken, refreshToken } = generateTokens(
+      req,
+      userInDB.role,
+      userInDB
+    );
+    // Guardamos el Refresh Roken en una cookie con el ajuste de httpOnly,
+    // evitando así el robo mediante scripts desde el lado del cliente
+    setCookie(req, res, 'refreshToken', refreshToken);
+    // Retornamos el nuevo Token de acceso al Frontend en la respuesta
+    return res.status(200).send({ accessToken: accessToken });
   } catch (error) {
-    LogDanger('Cannot refresh the token', error);
+    LogDanger('Refresh token has expired or has been revoked', error);
     return await { error: { code: 123, message: error } };
   }
 };
