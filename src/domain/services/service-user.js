@@ -231,35 +231,6 @@ export const GetOne = async (req, res) => {
   }
 };
 
-// export const GetNickname = async (req, res) => {
-//   let status = 'Success',
-//     errorcode = '',
-//     message = '',
-//     data = '',
-//     statuscode = 0,
-//     response = {};
-//   try {
-//     let resOrm = await ormUser.GetNickname(req);
-//     if (resOrm.error) {
-//       (status = 'Failure'),
-//         (errorcode = resOrm.error.code),
-//         (message = resOrm.error.messsage),
-//         (statuscode = enum_.CODE_BAD_REQUEST);
-//     } else {
-//       (message = 'User has been found'),
-//         (data = resOrm),
-//         (statuscode = enum_.CODE_CREATED);
-//     }
-//     response = await ResponseService(status, errorcode, message, data);
-//     return res.status(statuscode).send(response);
-//   } catch (error) {
-//     console.log('error = ', error);
-//     return res
-//       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-//       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
-//   }
-// };
-
 export const UpdatePlayers = async (req, res) => {
   let status = 'Success',
     errorcode = '',
