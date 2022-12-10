@@ -204,7 +204,7 @@ export const UpdateUsersPoints = async (req) => {
         totalPoints += player.points
       })
       const updatepoints = await db.User.findByIdAndUpdate(user, {
-        $set: { points: totalPoints },
+        $inc: { points: totalPoints },
       });
       return updatepoints
     }
