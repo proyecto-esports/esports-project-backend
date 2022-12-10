@@ -123,7 +123,9 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id).populate('players lineup competition');
+    const user = await db.User.findById(id).populate(
+      'players lineup competition'
+    );
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -193,25 +195,24 @@ export const UpdateLineup = async (req) => {
 export const UpdateUsersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const users = await db.Competition.findById(id)
+    const users = await db.Competition.findById(id);
 
-    
-       users.users.forEach((user)=> {
+    users.users.forEach((user) => {
       const extracLine = async () => {
-      let totalPoints = 0  
-      const line = await db.User.findById(user).populate('lineup')
-      line.lineup.forEach((player)=> {
-        totalPoints += player.points
-      })
-      const updatepoints = await db.User.findByIdAndUpdate(user, {
-        $inc: { points: totalPoints },
-      });
-      return updatepoints
-    }
-    
-        extracLine()
-    })
-    return "Funsiona"
+        let totalPoints = 0;
+        const line = await db.User.findById(user).populate('lineup');
+        line.lineup.forEach((player) => {
+          totalPoints += player.points;
+        });
+        const updatepoints = await db.User.findByIdAndUpdate(user, {
+          $inc: { points: totalPoints },
+        });
+        return updatepoints;
+      };
+
+      extracLine();
+    });
+    return 'Funsiona';
   } catch (error) {
     console.log('error = ', error);
     return res
@@ -387,5 +388,23 @@ export const changePlayerLineup = async (req) => {
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const benchPlayer = async (req) => {
+  try {
+    const { id } = req.params;
+    const user = await db.User.findById(id).populate('players lineup');
+    const bench = user.players.filter((player) => {
+      let free = true;
+      user.lineup.forEach((lineupPlayer) => {
+        if (lineupPlayer.nickname === player.nickname) free = false;
+      });
+      return free;
+    });
+    return bench;
+  } catch (error) {
+    LogDanger('Cannot update the bench', error);
+    return await { error: { code: 123, message: error } };
   }
 };

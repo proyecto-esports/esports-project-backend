@@ -491,3 +491,32 @@ export const changePlayerLineup = async (req, res) => {
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
+
+export const benchPlayer = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.benchPlayer(req);
+    if (resOrm.err) {
+      (status = 'Failure'),
+        (errorcode = resOrm.err.code),
+        (message = 'That player already bench'),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Updated Bench'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
