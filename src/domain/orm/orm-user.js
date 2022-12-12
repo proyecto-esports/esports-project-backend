@@ -9,78 +9,80 @@ import {
   LogWarning,
 } from '../../utils/magic.js';
 import { log } from 'config-yml';
+import setCookie from '../../utils/helpers/tokenManipulation.js';
+import { generateTokens } from './../../utils/helpers/generateTokens.js';
 
 const db = conn.connMongo;
 
 export const Create = async (req) => {
   try {
     const newUser = new db.User(req.body);
-    console.log(newUser);
-    const userNickname = await db.User.findOne({ nickname: newUser.nickname });
-    const userGmail = await db.User.findOne({ gmail: newUser.gmail });
-    const userExists = userNickname || userGmail;
+
+    const userExists = await db.User.findOne({ gmail: newUser.gmail });
     if (userExists) return LogDanger('That user already exists');
+
     newUser.password = bcrypt.hashSync(newUser.password, 6);
+
     if (req.file) {
       newUser.image = req.file.path;
     }
 
     const savedUser = await newUser.save();
     return savedUser;
-  } catch (err) {
-    LogDanger('User register failed', err);
-    return await { err: { code: 123, message: err } };
+  } catch (error) {
+    LogDanger('User register failed', error);
+    return await { error: { code: 123, message: error } };
   }
 };
 
-export const Login = async (req) => {
+export const Login = async (req, res) => {
   try {
-    const userByNickname = await db.User.findOne({
-      nickname: req.body.nickname,
-    });
-    const userByGmail = await db.User.findOne({ gmail: req.body.gmail });
+    const userInDB = await db.User.findOne({ gmail: req.body.gmail });
 
-    const userIndb = userByNickname || userByGmail;
-    if (!userIndb) return LogDanger("Login credentials doesn't exist");
+    if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
-    if (bcrypt.compareSync(req.body.password, userIndb.password)) {
-      console.log(userIndb);
-      const userToken = jwt.sign(
-        { ...userIndb },
-        req.app.get('userSecretKey'),
-        {
-          expiresIn: '1h',
-        }
+    if (bcrypt.compareSync(req.body.password, userInDB.password)) {
+      const { accessToken, refreshToken } = generateTokens(
+        req,
+        userInDB.role,
+        userInDB
       );
-      const adminToken = jwt.sign(
-        { ...userIndb },
-        req.app.get('adminSecretKey'),
-        {
-          expiresIn: '1h',
-        }
-      );
-      userIndb.password = null;
 
-      if (userIndb.role === 'admin') {
-        return { user: userIndb, token: adminToken };
-      } else {
-        return { user: userIndb, token: userToken };
-      }
+      userInDB.password = null;
+
+      setCookie(req, res, 'refreshToken', refreshToken);
+
+      return { user: userInDB, token: accessToken };
     } else {
       return next('User password incorrect');
     }
-  } catch (err) {
-    LogDanger('User login failed', err);
-    return await { err: { code: 123, message: err } };
+  } catch (error) {
+    LogDanger('User login failed', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const Logout = async (req, res) => {
+  try {
+    try {
+      res.cookie('refreshToken', null);
+    } catch (error) {
+      console.log(error);
+    }
+
+    return 'User logout successfully';
+  } catch (error) {
+    LogDanger('User logout failed', error);
+    return await { error: { code: 123, message: error } };
   }
 };
 
 export const GetAll = async () => {
   try {
     return await db.User.find();
-  } catch (err) {
-    LogDanger('Cannot getAll users', err);
-    return await { err: { code: 123, message: err } };
+  } catch (error) {
+    LogDanger('Cannot getAll users', error);
+    return await { error: { code: 123, message: error } };
   }
 };
 
@@ -94,11 +96,11 @@ export const Update = async (req) => {
     }
     const updatedUser = await db.User.findByIdAndUpdate(id, user);
     return updatedUser;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -106,33 +108,33 @@ export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const userDel = await db.User.findById(id);
-    console.log(userDel.image);
     if (userDel.image) {
       deleteFile(userDel.image);
     }
     const deletedUser = await db.User.findByIdAndDelete(id);
     return deletedUser;
-  } catch (err) {
+  } catch (error) {
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id);
+    const user = await db.User.findById(id).populate('players lineup competition');
+    console.log(user)
     return user;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
-export const UpdatePlayers = async (req) => {
+export const UpdateUsersPlayers = async (req) => {
   try {
     const { id } = req.params;
     const { player } = req.body;
@@ -140,11 +142,11 @@ export const UpdatePlayers = async (req) => {
       $push: { players: player },
     });
     return updatedPlantilla;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -165,7 +167,7 @@ export const UpdateLineup = async (req) => {
         } else {
           LogDanger('That player already lineup');
           return await {
-            err: { code: 123, message: 'That player already lineup' },
+            error: { code: 123, message: 'That player already lineup' },
           };
         }
       } else {
@@ -177,32 +179,44 @@ export const UpdateLineup = async (req) => {
     } else {
       LogDanger('That player isnt you');
       return await {
-        err: { code: 123, message: 'That player already lineup' },
+        error: { code: 123, message: 'That player already lineup' },
       };
     }
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
-export const UpdatePlayersPoints = async (req) => {
+export const UpdateUsersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const { point } = req.body;
-    const playersUser = await db.User.findById(id);
-    let userPoints = playersUser.points + point;
-    const updatePlayersPoints = await db.User.findByIdAndUpdate(id, {
-      $set: { points: userPoints },
-    });
-    return updatePlayersPoints;
-  } catch (err) {
-    console.log('err = ', err);
+    const users = await db.Competition.findById(id)
+
+    
+       users.users.forEach((user)=> {
+      const extracLine = async () => {
+      let totalPoints = 0  
+      const line = await db.User.findById(user).populate('lineup')
+      line.lineup.forEach((player)=> {
+        totalPoints += player.points
+      })
+      const updatepoints = await db.User.findByIdAndUpdate(user, {
+        $inc: { points: totalPoints },
+      });
+      return updatepoints
+    }
+    
+        extracLine()
+    })
+    return "Funsiona"
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -217,11 +231,11 @@ export const UpdatePlayersMoney = async (req) => {
       $set: { money: userMoney },
     });
     return updatePlayersMoney;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -233,11 +247,11 @@ export const UpdateCompetition = async (req) => {
       $set: { competitions: competition },
     });
     return updateCompetition;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -249,11 +263,11 @@ export const UpdateRole = async (req) => {
       $set: { role: role },
     });
     return updateRole;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
 
@@ -275,7 +289,7 @@ export const InicialPlayers = async (req) => {
     });
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
-        if (disablePlayers.includes(player._id)) free = false;
+      if (disablePlayers.includes(player._id)) free = false;
       return free;
     });
     const randomPlayers = freePlayers.sort(() => {
@@ -301,3 +315,77 @@ export const InicialPlayers = async (req) => {
   }
 };
 
+export const SellPlayer = async (req) => {
+  try {
+    const { id } = req.params;
+    const { player } = req.body;
+
+    const getUser = await db.User.findById(id).populate('players');
+    const playerToSell = await db.Player.findById(player);
+    const playerToSellValue = playerToSell.value;
+    const reducedValue = playerToSellValue * 0.7;
+    const newUserMoney = getUser.money + reducedValue;
+
+    const updatePlayersAndMoney = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $pull: { players: player },
+        $set: { money: newUserMoney },
+      },
+      { new: true }
+    );
+    return updatePlayersAndMoney;
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const changePlayerLineup = async (req) => {
+  try {
+    const { id } = req.params;
+    const { currentPlayer, newPlayer } = req.body;
+    const user = await db.User.findById(id).populate('players');
+
+    const lineupUser = user.lineup;
+
+    if (lineupUser.length) {
+      if (!lineupUser.includes(newPlayer)) {
+        const addPlayer = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $push: { lineup: newPlayer },
+            // $pull: { lineup: currentPlayer },
+          },
+          { new: true }
+        );
+        const removePlayer = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $pull: { lineup: currentPlayer },
+          },
+          { new: true }
+        );
+        console.log(removePlayer);
+        return removePlayer;
+      } else {
+        LogDanger('That player already lineup');
+        return await {
+          error: { code: 123, message: 'That player already lineup' },
+        };
+      }
+    } else {
+      LogDanger('Dont have players in your lineup');
+      return await {
+        error: { code: 123, message: 'That player already lineup' },
+      };
+    }
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};

@@ -12,10 +12,10 @@ export const GetAll = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormCompetition.GetAll();
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.message),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Success GetAll competitions'),
@@ -46,18 +46,17 @@ export const Create = async (req, res) => {
   try {
     const { name } = req.body;
     if (name) {
-      let resOrm = await ormCompetition.Create(req.body);
+      let resOrm = await ormCompetition.Create(req, res);
 
       if (resOrm.error) {
         (status = 'Failure'),
           (errorcode = resOrm.error.code),
-          (message = resOrm.err.message),
+          (message = resOrm.error.message),
           (statuscode = enum_.CODE_BAD_REQUEST);
       } else {
         (message = 'Sucess create competitions'),
           (data = resOrm),
           (statuscode = enum_.CODE_CREATED);
-        console.log(data);
       }
     } else {
       (status = 'Failure'),
@@ -90,7 +89,7 @@ export const GetOne = async (req, res) => {
     let resOrm = await ormCompetition.GetOne(req);
     if (resOrm.error) {
       (status = 'Failure'),
-        (message = resOrm.err.message),
+        (message = resOrm.error.message),
         (errorcode = resOrm.error.code),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -122,10 +121,10 @@ export const GetName = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormCompetition.GetName(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.message),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Success GetName competition'),
@@ -155,12 +154,11 @@ export const Update = async (req, res) => {
   let statuscode = 0;
   let response = {};
   try {
-    console.log(req.body);
     let resOrm = await ormCompetition.Update(req);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = resOrm.err.message),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Sucess Update competitions'),
@@ -195,7 +193,7 @@ export const UpdateUsers = async (req, res) => {
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = resOrm.err.message),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Sucess Update users of competition'),
@@ -226,7 +224,6 @@ export const UpdateMarket = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormCompetition.UpdateMarket(req);
-    
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
@@ -264,7 +261,7 @@ export const Delete = async (req, res) => {
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = resOrm.err.message),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Sucess Delete competitions'),

@@ -1,6 +1,6 @@
-import { jwt } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-import setError from '../helpers/error';
+import setError from '../helpers/error.js';
 
 const isLogged = (req, res, next) => {
   const authorization = req.headers.authorization;
@@ -15,9 +15,9 @@ const isLogged = (req, res, next) => {
   const jwtStringify = splits[1];
 
   try {
-    var token = jwt.verify(jwtStringify, req.app.get('userSecretKey'));
+    var token = jwt.verify(jwtStringify, req.app.get('userAccessKey'));
   } catch (err) {
-    return res.json(setError(500, 'Token invalid'));
+    return res.json(setError(401, 'Token invalid'));
   }
 
   const authority = {
@@ -30,4 +30,4 @@ const isLogged = (req, res, next) => {
   next();
 };
 
-export default isLogged
+export default isLogged;

@@ -1,6 +1,8 @@
 import { default as conn } from '../repositories/mongo.repository.js';
 import { LogDanger } from '../../utils/magic.js';
 import { diskStorage } from 'multer';
+import { generateTokens } from '../../utils/helpers/generateTokens.js';
+import setCookie from './../../utils/helpers/tokenManipulation.js';
 
 const db = conn.connMongo;
 
@@ -13,11 +15,35 @@ export const GetAll = async () => {
   }
 };
 
-export const Create = async (req) => {
+export const Create = async (req, res) => {
   try {
-    const data = await new db.Competition(req);
-    const saveCompetition = await data.save();
-    return saveCompetition;
+    req.body.users = JSON.parse(req.body.users);
+
+    const userId = req.body.users[0];
+
+    const user = await db.User.findById(userId);
+
+    const { accessToken, refreshToken } = generateTokens(req, 'admin', user);
+
+    const userUpdated = await db.User.findByIdAndUpdate(
+      userId,
+      {
+        role: 'admin',
+      },
+      { new: true }
+    );
+
+    setCookie(req, res, 'refreshToken', refreshToken);
+
+    const competition = await new db.Competition(req.body);
+
+    const savedCompetition = await competition.save();
+
+    return {
+      competition: savedCompetition,
+      user: userUpdated,
+      accessToken: accessToken,
+    };
   } catch (error) {
     LogDanger('Cannot create competition', error);
     return await { error: { code: 123, message: error } };
@@ -80,7 +106,7 @@ export const UpdateUsers = async (req) => {
     });
     return competitionUpdate;
   } catch (error) {
-    LogDanger('Cannot update the competition', error);
+    LogDanger('Cannot update the users of the competition', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -89,14 +115,48 @@ export const UpdateMarket = async (req) => {
   try {
     const { id } = req.params;
     const selectCompetition = await db.Competition.findById(id)
-      .populate('market')
+      .populate({ path: 'market', populate: { path: 'bids' } })
       .populate({
         path: 'users',
         populate: { path: 'players' },
       });
 
     const competitionUsers = selectCompetition.users;
+    // DESACTIVO JUGADORES ACTUALES
     const disabledPlayers = selectCompetition.market;
+
+    // ASIGNO JUGADORES A GANADORES
+    disabledPlayers.forEach((player) => {
+      if (player.bids.length) {
+        player.bids.sort((bidA, bidB) => {
+          if (bidA.money > bidB.money) return -1;
+          if (bidA.money < bidB.money) return 1;
+          return 0;
+        });
+
+        player.bids.forEach(async (bid, i) => {
+          if (i === 0) {
+            await db.User.findByIdAndUpdate(
+              bid.user,
+              {
+                $push: { players: bid.player },
+              },
+              { new: true }
+            );
+          } else {
+            await db.User.findByIdAndUpdate(bid.user, {
+              $inc: { money: bid.money },
+            });
+          }
+          // $unset deletes a specified field, no matter what value you pass
+          await db.Player.findByIdAndUpdate(player._id, {
+            $unset: { bids: [] },
+          });
+        });
+      }
+    });
+
+    // DESACTIVO JUGADORES EN POSESIÓN
     const allPlayers = await db.Player.find();
     competitionUsers.forEach((user) => {
       user.players.forEach((player) => {
@@ -114,33 +174,30 @@ export const UpdateMarket = async (req) => {
       return free;
     });
 
-    const randomMarket = freePlayers.sort(function () {
-      return Math.random() - 0.5;
-    });
+    const randomMarket = freePlayers.sort(() => Math.random() - 0.5);
 
-    console.log('SLICE', randomMarket.slice(0, 10));
-
-    console.log('randomMarket', randomMarket);
-    if (randomMarket.length !== 0) {
-      console.log('market');
-      const competitionUpdate = await db.Competition.findByIdAndUpdate(id, {
-        $set: {
-          market: randomMarket.slice(0, 1),
+    if (randomMarket.length) {
+      const competitionUpdate = await db.Competition.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            market: randomMarket.slice(0, 1),
+          },
         },
-      });
-      console.log('NO ROMPE');
-      console.log(competitionUpdate);
+        { new: true }
+      );
+
       return competitionUpdate;
     }
-    console.log('HOLA');
-    return await {
+
+    return {
       error: {
         code: 500,
         message: 'There are no available players on the market',
       },
     };
   } catch (error) {
-    LogDanger('Cannot update the competition', error);
+    LogDanger('Cannot update the market', error);
     return await { error: { code: 123, message: error } };
   }
 };
