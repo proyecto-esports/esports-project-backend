@@ -47,7 +47,6 @@ export const Create = async (req, res) => {
     const { userId, money, playerId } = req.body;
     if (userId && money && playerId) {
       let resOrm = await ormBid.Create(req);
-      console.log(resOrm);
       if (resOrm.error) {
         (status = 'Failure'),
           (errorcode = resOrm.error.code),
@@ -118,7 +117,6 @@ export const Delete = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormBid.Delete(req);
-    console.log(resOrm);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
@@ -190,7 +188,7 @@ export const RenewBid = async (req, res) => {
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = resOrm.error.message),
+        (message = resOrm.err.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Success update bids'),

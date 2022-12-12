@@ -15,16 +15,30 @@ export const GetAll = async () => {
 export const Create = async (req) => {
   try {
     const { userId, money, playerId } = req.body;
-   
+
     const user = await db.User.findById(userId).populate({
       path: 'competition',
-      populate: { path: 'users market' },
-    }); 
-   
-    const player = await db.Player.findById(playerId);
- 
+      populate: [
+        { path: 'users' },
+        {
+          path: 'market',
+          populate: { path: 'bids', populate: { path: 'user' } },
+        },
+      ],
+    });
+
     const competition = user.competition;
-    
+
+    const player = competition.market.find(
+      (player) => JSON.stringify(player._id) === JSON.stringify(playerId)
+    );
+
+    const existentBid = player.bids.find(
+      (bid) => JSON.stringify(bid.user._id) === JSON.stringify(userId)
+    );
+
+    if (existentBid) return Update(existentBid, money);
+
     if (!competition)
       return {
         error: { code: 400, message: 'The user is not in the competition' },
@@ -35,12 +49,14 @@ export const Create = async (req) => {
     const playerMarket = playersInMarket.find(
       (play) => play.nickname === player.nickname
     );
+
     if (!playerMarket)
       return {
         error: { code: 400, message: 'The player is not in the market' },
       };
 
     const valuePlayer = playerMarket.value;
+
     if (valuePlayer !== player.value)
       return {
         error: {
@@ -53,8 +69,11 @@ export const Create = async (req) => {
     const userInMarket = usersInMarket.find(
       (userMarket) => userMarket._id.toString() === userId.toString()
     );
+
     if (!userInMarket)
-      return { error: { code: 400, message: 'The user is not in the competition' } };
+      return {
+        error: { code: 400, message: 'The user is not in the competition' },
+      };
     else if (user.money < money)
       return { error: { code: 400, message: "You don't have enough money" } };
     else if (player.value > money)
@@ -81,7 +100,6 @@ export const Create = async (req) => {
         },
         { new: true }
       );
-
       return bidInPlayer;
     }
   } catch (error) {
@@ -90,14 +108,11 @@ export const Create = async (req) => {
   }
 };
 
-export const Update = async (req) => {
+const Update = async (existentBid, money) => {
   try {
-    const { id } = req.params;
-    const { money } = req.body;
-    const oldBid = await db.Bid.findById(id);
-    const user = await db.User.findById(oldBid.user);
+    const { user, _id: id } = existentBid;
 
-    if (user.money + oldBid.money < money)
+    if (user.money + existentBid.money < money)
       return {
         error: {
           code: 400,
@@ -112,7 +127,7 @@ export const Update = async (req) => {
     );
 
     await db.User.findByIdAndUpdate(user._id, {
-      $inc: { money: oldBid.money - money },
+      $inc: { money: existentBid.money - money },
     });
 
     return updatedBid;

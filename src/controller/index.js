@@ -23,6 +23,7 @@ router.put('/users/points/:id', user.UpdateUsersPoints);
 router.put('/users/money/:id', user.UpdatePlayersMoney);
 router.put('/users/competition/:id', user.UpdateCompetition);
 router.put('/users/inicialplayers/:id', user.InicialPlayers);
+router.put('user/:id/invited', user.InviteFrend);
 router.put('/users/role/:id', user.UpdateRole);
 router.put('/users/sell/:id', user.SellPlayer);
 router.put('/users/changeLineUp/:id', user.changePlayerLineup);
@@ -31,8 +32,6 @@ router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
 router.delete('/bids', bid.DeleteAll);
 router.delete('/bids/:id', bid.Delete);
-router.patch('/bids/:id', bid.Update);
-router.delete('/bids/:id/renew', bid.RenewBid); //Esto lo utilizamos para devolver el dinero y borrar la apuesta
 router.post('/players/:id/bids', player.AddBid);
 router.post('/players', player.Create);
 router.get('/players', player.GetAll);
@@ -49,4 +48,5 @@ router.put('/competitions/:id', competition.UpdateUsers);
 router.patch('/competitions/:id/market', competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
 router.get('/google', (req, res) => res.send(req.user));
+
 export default router;

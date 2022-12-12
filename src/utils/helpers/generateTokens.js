@@ -30,7 +30,7 @@ const adminTokens = (req, user) => {
   });
 
   return {
-    accessToken: refreshToken,
+    accessToken: accessToken,
     refreshToken: refreshToken,
   };
 };
