@@ -123,8 +123,10 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id).populate('players lineup competition');
-    console.log(user)
+    const user = await db.User.findById(id).populate(
+      'players lineup competition'
+    );
+    console.log(user);
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -194,25 +196,24 @@ export const UpdateLineup = async (req) => {
 export const UpdateUsersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const users = await db.Competition.findById(id)
+    const users = await db.Competition.findById(id);
 
-    
-       users.users.forEach((user)=> {
+    users.users.forEach((user) => {
       const extracLine = async () => {
-      let totalPoints = 0  
-      const line = await db.User.findById(user).populate('lineup')
-      line.lineup.forEach((player)=> {
-        totalPoints += player.points
-      })
-      const updatepoints = await db.User.findByIdAndUpdate(user, {
-        $inc: { points: totalPoints },
-      });
-      return updatepoints
-    }
-    
-        extracLine()
-    })
-    return "Funsiona"
+        let totalPoints = 0;
+        const line = await db.User.findById(user).populate('lineup');
+        line.lineup.forEach((player) => {
+          totalPoints += player.points;
+        });
+        const updatepoints = await db.User.findByIdAndUpdate(user, {
+          $inc: { points: totalPoints },
+        });
+        return updatepoints;
+      };
+
+      extracLine();
+    });
+    return 'Funsiona';
   } catch (error) {
     console.log('error = ', error);
     return res
@@ -383,6 +384,39 @@ export const changePlayerLineup = async (req) => {
         error: { code: 123, message: 'That player already lineup' },
       };
     }
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const CreateInvitationToGroup = async (req) => {
+  try {
+    const { id } = req.params;
+    const { competition } = req.body;
+
+    const getUser = await db.User.findById(id);
+    const userCompetition = getUser.competition;
+
+    const getAllCompetitions = await db.Competition.find().populate(
+      'competition'
+    );
+    console.log(getAllCompetitions);
+    let encryptInvite;
+
+    getAllCompetitions.forEach((oneCompetition) => {
+      console.log(competition);
+      console.log(JSON.stringify(oneCompetition._id));
+      if (JSON.stringify(oneCompetition._id) === competition) {
+        console.log('COINCIDO');
+        if (competition === userCompetition) {
+          encryptInvite = bcrypt.hashSync(competition, 6);
+        }
+      }
+    });
+    return encryptInvite;
   } catch (err) {
     console.log('err = ', err);
     return res
