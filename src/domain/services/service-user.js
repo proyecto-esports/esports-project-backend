@@ -414,10 +414,10 @@ export const InicialPlayers = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.InicialPlayers(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -426,8 +426,8 @@ export const InicialPlayers = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -443,9 +443,9 @@ export const SellPlayer = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.SellPlayer(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
+        (errorcode = resOrm.error.code),
         (message = 'That player already lineup'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -501,9 +501,9 @@ export const CreateInvitationToGroup = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.CreateInvitationToGroup(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
+        (errorcode = resOrm.error.code),
         (message = 'There is not such competition'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -513,8 +513,8 @@ export const CreateInvitationToGroup = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));

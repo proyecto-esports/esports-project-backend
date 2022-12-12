@@ -403,20 +403,20 @@ export const CreateInvitationToGroup = async (req) => {
     const getAllCompetitions = await db.Competition.find().populate(
       'competition'
     );
-    console.log(getAllCompetitions);
-    let encryptInvite;
+
+    let encryptedInvite;
 
     getAllCompetitions.forEach((oneCompetition) => {
-      console.log(competition);
-      console.log(JSON.stringify(oneCompetition._id));
-      if (JSON.stringify(oneCompetition._id) === competition) {
-        console.log('COINCIDO');
-        if (competition === userCompetition) {
-          encryptInvite = bcrypt.hashSync(competition, 6);
+      if (oneCompetition._id.toString() === competition) {
+        if (competition.toString() === userCompetition.toString()) {
+          encryptedInvite = bcrypt.hashSync(competition, 6);
         }
       }
     });
-    return encryptInvite;
+
+    return encryptedInvite
+      ? encryptedInvite
+      : { error: "Couldn't create an invitation" };
   } catch (err) {
     console.log('err = ', err);
     return res
