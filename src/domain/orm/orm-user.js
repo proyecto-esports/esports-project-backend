@@ -389,3 +389,35 @@ export const changePlayerLineup = async (req) => {
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
+
+
+
+
+export const InviteFrend = async (req) => {
+  try {
+    const { id } = req.params;
+    const allCompetitions  = await db.Competition.find()
+    console.log(allCompetitions);
+    const { competition } = req.body;
+    console.log(competition);
+
+   const joingGroup = allCompetitions._id.forEach(async (idComp) => {
+        if(bcrypt.compareSync(competition, idComp)){
+           const updateCompetition = await db.User.findByIdAndUpdate(id, {
+          $set: { competitions: idComp },
+           });
+        }
+    });
+    
+
+
+
+   
+    return joingGroup;
+  } catch (error) {
+    console.log('error = ', error);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
+  }
+};
