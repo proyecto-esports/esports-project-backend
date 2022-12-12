@@ -491,3 +491,32 @@ export const changePlayerLineup = async (req, res) => {
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
+
+export const InviteFrend = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.InviteFrend(req);
+    if (resOrm.err) {
+      (status = 'Failure'),
+        (errorcode = resOrm.err.code),
+        (message = 'That player already lineup'),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Updated Lineup'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (err) {
+    console.log('err = ', err);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
