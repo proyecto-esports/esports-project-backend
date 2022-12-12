@@ -300,6 +300,7 @@ export const InicialPlayers = async (req) => {
       const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
         $set: {
           players: randomPlayers.slice(0, 5),
+          lineup: randomPlayers.slice(0, 5),
         },
       });
       return playersUserUpdate;
@@ -425,17 +426,17 @@ export const benchPlayer = async (req) => {
 export const InviteFrend = async (req) => {
   try {
     const { id } = req.params;
-    const allCompetitions  = await db.Competition.find()
+    const allCompetitions = await db.Competition.find();
     console.log(allCompetitions);
     const { competition } = req.body;
     console.log(competition);
 
-   const joingGroup = allCompetitions._id.forEach(async (idComp) => {
-        if(bcrypt.compareSync(competition, idComp)){
-           const updateCompetition = await db.User.findByIdAndUpdate(id, {
+    const joingGroup = allCompetitions._id.forEach(async (idComp) => {
+      if (bcrypt.compareSync(competition, idComp)) {
+        const updateCompetition = await db.User.findByIdAndUpdate(id, {
           $set: { competitions: idComp },
-           });
-        }
+        });
+      }
     });
     return joingGroup;
   } catch (error) {
