@@ -494,7 +494,8 @@ export const changePlayerLineup = async (req, res) => {
   }
 };
 
-export const CreateInvitationToGroup = async (req, res) => {
+export const InviteFriend = async (req, res) => {
+
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -502,8 +503,10 @@ export const CreateInvitationToGroup = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.CreateInvitationToGroup(req);
-    if (resOrm.error) {
+
+    let resOrm = await ormUser.InviteFriend(req);
+    if (resOrm.err) {
+
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
         (message = 'There is not such competition'),
@@ -556,3 +559,31 @@ export const benchPlayer = async (req, res) => {
   }
 };
 
+export const CreateInvitationToGroup = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.CreateInvitationToGroup(req);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = 'There is not such competition'),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'User updated'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    console.log('err = ', error);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};

@@ -405,6 +405,53 @@ export const changePlayerLineup = async (req) => {
   }
 };
 
+
+export const benchPlayer = async (req) => {
+  try {
+    const { id } = req.params;
+    const user = await db.User.findById(id).populate('players lineup');
+    const bench = user.players.filter((player) => {
+      let free = true;
+      user.lineup.forEach((lineupPlayer) => {
+        if (lineupPlayer.nickname === player.nickname) free = false;
+      });
+      return free;
+    });
+    return bench;
+  } catch (error) {
+    LogDanger('Cannot update the bench', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const InviteFriend = async (req) => {
+  try {
+    const { id } = req.params;
+    const allCompetitions = await db.Competition.find()
+    const { competition } = req.body;
+
+   const joinGroup = allCompetitions.map(async (idComp) => {
+        if(bcrypt.compareSync(idComp._id.toString(), competition.toString() )){
+         await db.User.findByIdAndUpdate(id, {
+          $set: { competition: idComp._id },
+           });
+           const updateCompetition = await db.Competition.findByIdAndUpdate(idComp._id, {
+            $push: { users: id },
+             });
+           return updateCompetition
+            }
+      }
+    });
+    return joinGroup || {error: "esto no va"};
+  } catch (error) {
+    console.log('error = ', error);
+
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
 export const CreateInvitationToGroup = async (req) => {
   try {
     const { id } = req.params;
@@ -423,15 +470,18 @@ export const CreateInvitationToGroup = async (req) => {
       if (oneCompetition._id.toString() === competition) {
         if (competition.toString() === userCompetition.toString()) {
           encryptedInvite = bcrypt.hashSync(competition, 6);
-        }
+         }
       }
     });
 
     return encryptedInvite || { error: "Couldn't create an invitation" };
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
-};
+};  
+          
+
+      
