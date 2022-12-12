@@ -81,7 +81,6 @@ export const Create = async (req) => {
         },
         { new: true }
       );
-
       return bidInPlayer;
     }
   } catch (error) {

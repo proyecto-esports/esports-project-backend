@@ -157,7 +157,6 @@ export const UpdateLineup = async (req) => {
     const playersUser = await db.User.findById(id);
     let savePlayers = playersUser.players;
     let linePlayers = playersUser.lineup;
-
     if (savePlayers.includes(line)) {
       if (linePlayers.length) {
         if (!linePlayers.includes(line)) {
