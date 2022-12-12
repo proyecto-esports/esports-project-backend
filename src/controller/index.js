@@ -5,6 +5,7 @@ import * as competition from '../domain/services/competicion-service.js';
 import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
 import isAdmin from '../utils/middlewares/admin-auth-middleware.js';
+import isUser from '../utils/middlewares/user-auth-middleware.js';
 import refreshToken from '../utils/helpers/refreshToken.js';
 
 const router = express.Router();
@@ -26,6 +27,7 @@ router.put('user/:id/invited', user.InviteFrend);
 router.put('/users/role/:id', user.UpdateRole);
 router.put('/users/sell/:id', user.SellPlayer);
 router.put('/users/changeLineUp/:id', user.changePlayerLineup);
+router.get('/users/benchPlayers/:id', user.benchPlayer);
 router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
 router.delete('/bids', bid.DeleteAll);
@@ -48,4 +50,5 @@ router.put('/competitions/:id', competition.UpdateUsers);
 router.patch('/competitions/:id/market', competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
 router.get('/google', (req, res) => res.send(req.user));
+
 export default router;

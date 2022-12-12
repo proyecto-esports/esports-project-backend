@@ -224,7 +224,6 @@ export const UpdateMarket = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormCompetition.UpdateMarket(req);
-
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),

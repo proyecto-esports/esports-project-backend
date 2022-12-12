@@ -152,6 +152,8 @@ export const UpdateMarket = async (req) => {
           await db.Player.findByIdAndUpdate(player._id, {
             $unset: { bids: [] },
           });
+
+          await db.Bid.findByIdAndDelete(bid._id);
         });
       }
     });
