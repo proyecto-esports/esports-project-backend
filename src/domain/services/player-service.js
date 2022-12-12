@@ -177,10 +177,10 @@ export const ChangePoints = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormPlayer.ChangePoints(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.message),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'Success update player'),
@@ -189,12 +189,12 @@ export const ChangePoints = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    LogDanger('err: ', err);
+  } catch (error) {
+    LogDanger('err: ', error);
     response = await ResponseService(
       'Failure',
       enum_.CODE_BAD_REQUEST,
-      err,
+      error,
       ''
     );
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);

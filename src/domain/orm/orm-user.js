@@ -343,8 +343,8 @@ export const SellPlayer = async (req) => {
     );
     console.log(updatePlayers);
     return updatePlayers;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -397,8 +397,8 @@ export const changePlayerLineup = async (req) => {
         error: { code: 123, message: 'That player already lineup' },
       };
     }
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
