@@ -416,8 +416,8 @@ export const InicialPlayers = async (req, res) => {
     let resOrm = await ormUser.InicialPlayers(req);
     if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -427,7 +427,9 @@ export const InicialPlayers = async (req, res) => {
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (error) {
+
     console.log('error = ', error);
+
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
@@ -492,7 +494,7 @@ export const changePlayerLineup = async (req, res) => {
   }
 };
 
-export const InviteFrend = async (req, res) => {
+export const CreateInvitationToGroup = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -500,26 +502,30 @@ export const InviteFrend = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.InviteFrend(req);
+    let resOrm = await ormUser.CreateInvitationToGroup(req);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = 'Invalid code'),
+        (message = 'There is not such competition'),
+
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
-      (message = 'Welcome to the game'),
+      (message = 'User updated'),
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (error) {
+
     console.log('error = ', error);
+
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
+
 
 export const benchPlayer = async (req, res) => {
   let status = 'Success',
@@ -543,9 +549,10 @@ export const benchPlayer = async (req, res) => {
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (error) {
-    console.log('err = ', error);
+    console.log('error = ', error);
     return res
       .status(_enum.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
+
