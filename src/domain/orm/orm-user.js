@@ -300,6 +300,7 @@ export const InicialPlayers = async (req) => {
       const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
         $set: {
           players: randomPlayers.slice(0, 5),
+          lineup: randomPlayers.slice(0, 5),
         },
       });
       return playersUserUpdate;
@@ -342,8 +343,8 @@ export const SellPlayer = async (req) => {
     );
     console.log(updatePlayers);
     return updatePlayers;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -396,13 +397,14 @@ export const changePlayerLineup = async (req) => {
         error: { code: 123, message: 'That player already lineup' },
       };
     }
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
+
 
 export const benchPlayer = async (req) => {
   try {
@@ -437,13 +439,49 @@ export const InviteFriend = async (req) => {
             $push: { users: id },
              });
            return updateCompetition
-        }
+            }
+      }
     });
     return joinGroup || {error: "esto no va"};
+  } catch (error) {
+    console.log('error = ', error);
+
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const CreateInvitationToGroup = async (req) => {
+  try {
+    const { id } = req.params;
+    const { competition } = req.body;
+
+    const getUser = await db.User.findById(id);
+    const userCompetition = getUser.competition;
+
+    const getAllCompetitions = await db.Competition.find().populate(
+      'competition'
+    );
+
+    let encryptedInvite;
+
+    getAllCompetitions.forEach((oneCompetition) => {
+      if (oneCompetition._id.toString() === competition) {
+        if (competition.toString() === userCompetition.toString()) {
+          encryptedInvite = bcrypt.hashSync(competition, 6);
+         }
+      }
+    });
+
+    return encryptedInvite || { error: "Couldn't create an invitation" };
   } catch (error) {
     console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
-};
+};  
+          
+
+      
