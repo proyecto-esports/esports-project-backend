@@ -123,8 +123,10 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id).populate('players lineup competition');
-    console.log(user)
+    const user = await db.User.findById(id).populate(
+      'players lineup competition'
+    );
+    console.log(user);
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -193,25 +195,24 @@ export const UpdateLineup = async (req) => {
 export const UpdateUsersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const users = await db.Competition.findById(id)
+    const users = await db.Competition.findById(id);
 
-    
-       users.users.forEach((user)=> {
+    users.users.forEach((user) => {
       const extracLine = async () => {
-      let totalPoints = 0  
-      const line = await db.User.findById(user).populate('lineup')
-      line.lineup.forEach((player)=> {
-        totalPoints += player.points
-      })
-      const updatepoints = await db.User.findByIdAndUpdate(user, {
-        $inc: { points: totalPoints },
-      });
-      return updatepoints
-    }
-    
-        extracLine()
-    })
-    return "Funsiona"
+        let totalPoints = 0;
+        const line = await db.User.findById(user).populate('lineup');
+        line.lineup.forEach((player) => {
+          totalPoints += player.points;
+        });
+        const updatepoints = await db.User.findByIdAndUpdate(user, {
+          $inc: { points: totalPoints },
+        });
+        return updatepoints;
+      };
+
+      extracLine();
+    });
+    return 'Funsiona';
   } catch (error) {
     console.log('error = ', error);
     return res
@@ -319,22 +320,28 @@ export const SellPlayer = async (req) => {
   try {
     const { id } = req.params;
     const { player } = req.body;
-
     const getUser = await db.User.findById(id).populate('players');
     const playerToSell = await db.Player.findById(player);
+
     const playerToSellValue = playerToSell.value;
     const reducedValue = playerToSellValue * 0.7;
     const newUserMoney = getUser.money + reducedValue;
-
-    const updatePlayersAndMoney = await db.User.findByIdAndUpdate(
+    const updateMoney = await db.User.findByIdAndUpdate(
       id,
       {
-        $pull: { players: player },
         $set: { money: newUserMoney },
       },
       { new: true }
     );
-    return updatePlayersAndMoney;
+    const updatePlayers = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $pull: { players: player },
+      },
+      { new: true }
+    );
+    console.log(updatePlayers);
+    return updatePlayers;
   } catch (err) {
     console.log('err = ', err);
     return res
@@ -352,28 +359,35 @@ export const changePlayerLineup = async (req) => {
     const lineupUser = user.lineup;
 
     if (lineupUser.length) {
-      if (!lineupUser.includes(newPlayer)) {
-        const addPlayer = await db.User.findByIdAndUpdate(
-          id,
-          {
-            $push: { lineup: newPlayer },
-            // $pull: { lineup: currentPlayer },
-          },
-          { new: true }
-        );
-        const removePlayer = await db.User.findByIdAndUpdate(
-          id,
-          {
-            $pull: { lineup: currentPlayer },
-          },
-          { new: true }
-        );
-        console.log(removePlayer);
-        return removePlayer;
+      if (lineupUser.length > 4) {
+        if (!lineupUser.includes(newPlayer)) {
+          const addPlayer = await db.User.findByIdAndUpdate(
+            id,
+            {
+              $pull: { lineup: currentPlayer },
+            },
+            { new: true }
+          );
+          const removePlayer = await db.User.findByIdAndUpdate(
+            id,
+            {
+              $push: { lineup: newPlayer },
+            },
+            { new: true }
+          );
+          console.log('ADD', addPlayer);
+          console.log('Rem', removePlayer);
+          return removePlayer;
+        } else {
+          LogDanger('That player already lineup.');
+          return await {
+            error: { code: 123, message: 'That player already lineup.' },
+          };
+        }
       } else {
-        LogDanger('That player already lineup');
+        LogDanger('The lineup has already five player.');
         return await {
-          error: { code: 123, message: 'That player already lineup' },
+          error: { code: 123, message: 'That player already lineup.' },
         };
       }
     } else {
@@ -387,5 +401,23 @@ export const changePlayerLineup = async (req) => {
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const benchPlayer = async (req) => {
+  try {
+    const { id } = req.params;
+    const user = await db.User.findById(id).populate('players lineup');
+    const bench = user.players.filter((player) => {
+      let free = true;
+      user.lineup.forEach((lineupPlayer) => {
+        if (lineupPlayer.nickname === player.nickname) free = false;
+      });
+      return free;
+    });
+    return bench;
+  } catch (error) {
+    LogDanger('Cannot update the bench', error);
+    return await { error: { code: 123, message: error } };
   }
 };
