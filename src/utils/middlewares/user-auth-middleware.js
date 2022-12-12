@@ -16,7 +16,7 @@ const isLogged = (req, res, next) => {
 
   try {
     var token = jwt.verify(jwtStringify, req.app.get('userAccessKey'));
-  } catch (err) {
+  } catch (error) {
     return res.json(setError(401, 'Token invalid'));
   }
 

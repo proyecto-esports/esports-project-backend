@@ -1,6 +1,6 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
-import setError from "../helpers/error.js";
+import setError from '../helpers/error.js';
 
 const isAdmin = (req, res, next) => {
   const authorization = req.headers.authorization;
@@ -16,7 +16,7 @@ const isAdmin = (req, res, next) => {
 
   try {
     var token = jwt.verify(jwtStringify, req.app.get('adminAccessKey'));
-  } catch (err) {
+  } catch (error) {
     return res.json(setError(401, 'Token invalid'));
   }
 
@@ -29,4 +29,4 @@ const isAdmin = (req, res, next) => {
 
   next();
 };
-export default isAdmin
+export default isAdmin;

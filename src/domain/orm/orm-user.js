@@ -300,6 +300,7 @@ export const InicialPlayers = async (req) => {
       const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
         $set: {
           players: randomPlayers.slice(0, 5),
+          lineup: randomPlayers.slice(0, 5),
         },
       });
       return playersUserUpdate;
@@ -342,8 +343,8 @@ export const SellPlayer = async (req) => {
     );
     console.log(updatePlayers);
     return updatePlayers;
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -396,8 +397,8 @@ export const changePlayerLineup = async (req) => {
         error: { code: 123, message: 'That player already lineup' },
       };
     }
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('error = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -426,9 +427,7 @@ export const CreateInvitationToGroup = async (req) => {
       }
     });
 
-    return encryptedInvite
-      ? encryptedInvite
-      : { error: "Couldn't create an invitation" };
+    return encryptedInvite || { error: "Couldn't create an invitation" };
   } catch (err) {
     console.log('err = ', err);
     return res

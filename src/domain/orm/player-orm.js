@@ -77,7 +77,7 @@ export const AddBid = async (req) => {
     return addedBid;
   } catch (error) {
     LogDanger('User delete failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
 
@@ -106,6 +106,6 @@ export const ChangePoints = async (req) => {
     return actualizados;
   } catch (error) {
     LogDanger('Player update failed', error);
-    return await { err: { code: 123, message: error } };
+    return await { error: { code: 123, message: error } };
   }
 };
