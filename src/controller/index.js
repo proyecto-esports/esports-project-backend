@@ -26,6 +26,7 @@ router.put('/users/inicialplayers/:id', user.InicialPlayers);
 router.put('/users/role/:id', user.UpdateRole);
 router.put('/users/sell/:id', user.SellPlayer);
 router.put('/users/changeLineUp/:id', user.changePlayerLineup);
+router.get('/users/benchPlayers/:id', user.benchPlayer);
 router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
 router.delete('/bids', bid.DeleteAll);
