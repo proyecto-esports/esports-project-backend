@@ -1,4 +1,4 @@
-import { jwt } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 import setError from '../helpers/error.js';
 
@@ -30,4 +30,4 @@ const isLogged = (req, res, next) => {
   next();
 };
 
-export default isLogged
+export default isLogged;

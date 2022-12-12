@@ -5,6 +5,7 @@ import * as competition from '../domain/services/competicion-service.js';
 import * as bid from '../domain/services/service-bid.js';
 import * as player from './../domain/services/player-service.js';
 import isAdmin from '../utils/middlewares/admin-auth-middleware.js';
+import isUser from '../utils/middlewares/user-auth-middleware.js';
 import refreshToken from '../utils/helpers/refreshToken.js';
 
 const router = express.Router();
