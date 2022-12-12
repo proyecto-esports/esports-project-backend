@@ -408,11 +408,6 @@ export const InviteFrend = async (req) => {
            });
         }
     });
-    
-
-
-
-   
     return joingGroup;
   } catch (error) {
     console.log('error = ', error);
