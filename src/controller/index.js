@@ -32,8 +32,6 @@ router.get('/bids', bid.GetAll);
 router.post('/bids', bid.Create);
 router.delete('/bids', bid.DeleteAll);
 router.delete('/bids/:id', bid.Delete);
-router.patch('/bids/:id', bid.Update);
-router.delete('/bids/:id/renew', bid.RenewBid); //Esto lo utilizamos para devolver el dinero y borrar la apuesta
 router.post('/players/:id/bids', player.AddBid);
 router.post('/players', player.Create);
 router.get('/players', player.GetAll);

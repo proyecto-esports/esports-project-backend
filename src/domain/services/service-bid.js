@@ -117,7 +117,6 @@ export const Delete = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormBid.Delete(req);
-    console.log(resOrm);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
