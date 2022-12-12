@@ -352,28 +352,35 @@ export const changePlayerLineup = async (req) => {
     const lineupUser = user.lineup;
 
     if (lineupUser.length) {
-      if (!lineupUser.includes(newPlayer)) {
-        const addPlayer = await db.User.findByIdAndUpdate(
-          id,
-          {
-            $push: { lineup: newPlayer },
-            // $pull: { lineup: currentPlayer },
-          },
-          { new: true }
-        );
-        const removePlayer = await db.User.findByIdAndUpdate(
-          id,
-          {
-            $pull: { lineup: currentPlayer },
-          },
-          { new: true }
-        );
-        console.log(removePlayer);
-        return removePlayer;
+      if (lineupUser.length > 4) {
+        if (!lineupUser.includes(newPlayer)) {
+          const addPlayer = await db.User.findByIdAndUpdate(
+            id,
+            {
+              $pull: { lineup: currentPlayer },
+            },
+            { new: true }
+          );
+          const removePlayer = await db.User.findByIdAndUpdate(
+            id,
+            {
+              $push: { lineup: newPlayer },
+            },
+            { new: true }
+          );
+          console.log('ADD', addPlayer);
+          console.log('Rem', removePlayer);
+          return removePlayer;
+        } else {
+          LogDanger('That player already lineup.');
+          return await {
+            error: { code: 123, message: 'That player already lineup.' },
+          };
+        }
       } else {
-        LogDanger('That player already lineup');
+        LogDanger('The lineup has already five player.');
         return await {
-          error: { code: 123, message: 'That player already lineup' },
+          error: { code: 123, message: 'That player already lineup.' },
         };
       }
     } else {
@@ -390,6 +397,23 @@ export const changePlayerLineup = async (req) => {
   }
 };
 
+export const benchPlayer = async (req) => {
+  try {
+    const { id } = req.params;
+    const user = await db.User.findById(id).populate('players lineup');
+    const bench = user.players.filter((player) => {
+      let free = true;
+      user.lineup.forEach((lineupPlayer) => {
+        if (lineupPlayer.nickname === player.nickname) free = false;
+      });
+      return free;
+    });
+    return bench;
+  } catch (error) {
+    LogDanger('Cannot update the bench', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
 
 
 
