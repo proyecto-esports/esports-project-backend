@@ -414,10 +414,10 @@ export const InicialPlayers = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.InicialPlayers(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = resOrm.err.messsage),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.messsage),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -426,8 +426,8 @@ export const InicialPlayers = async (req, res) => {
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -443,9 +443,9 @@ export const SellPlayer = async (req, res) => {
     response = {};
   try {
     let resOrm = await ormUser.SellPlayer(req);
-    if (resOrm.err) {
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
+        (errorcode = resOrm.error.code),
         (message = 'That player already lineup'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
@@ -492,7 +492,7 @@ export const changePlayerLineup = async (req, res) => {
   }
 };
 
-export const InviteFrend = async (req, res) => {
+export const CreateInvitationToGroup = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -500,53 +500,23 @@ export const InviteFrend = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.InviteFrend(req);
-    if (resOrm.err) {
+    let resOrm = await ormUser.CreateInvitationToGroup(req);
+    if (resOrm.error) {
       (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = 'Invalid code'),
+        (errorcode = resOrm.error.code),
+        (message = 'There is not such competition'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
-      (message = 'Welcome to the game'),
+      (message = 'User updated'),
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
+  } catch (error) {
+    console.log('err = ', error);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
-
-export const benchPlayer = async (req, res) => {
-  let status = 'Success',
-    errorcode = '',
-    message = '',
-    data = '',
-    statuscode = 0,
-    response = {};
-  try {
-    let resOrm = await ormUser.benchPlayer(req);
-    if (resOrm.err) {
-      (status = 'Failure'),
-        (errorcode = resOrm.err.code),
-        (message = 'That player already bench'),
-        (statuscode = enum_.CODE_BADREQUEST);
-    } else {
-      (message = 'Updated Bench'),
-        (data = resOrm),
-        (statuscode = _enum._CODE_CREATED);
-    }
-    response = await ResponseService(status, errorcode, message, data);
-    return res.status(statuscode).send(response);
-  } catch (err) {
-    console.log('err = ', err);
-    return res
-      .status(_enum.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', _enum.CRASH_LOGIC, 'err', ''));
-  }
-};
-

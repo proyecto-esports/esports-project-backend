@@ -404,44 +404,35 @@ export const changePlayerLineup = async (req) => {
   }
 };
 
-export const benchPlayer = async (req) => {
+export const CreateInvitationToGroup = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id).populate('players lineup');
-    const bench = user.players.filter((player) => {
-      let free = true;
-      user.lineup.forEach((lineupPlayer) => {
-        if (lineupPlayer.nickname === player.nickname) free = false;
-      });
-      return free;
-    });
-    return bench;
-  } catch (error) {
-    LogDanger('Cannot update the bench', error);
-    return await { error: { code: 123, message: error } };
-  }
-};
-
-export const InviteFrend = async (req) => {
-  try {
-    const { id } = req.params;
-    const allCompetitions  = await db.Competition.find()
-    console.log(allCompetitions);
     const { competition } = req.body;
-    console.log(competition);
 
-   const joingGroup = allCompetitions._id.forEach(async (idComp) => {
-        if(bcrypt.compareSync(competition, idComp)){
-           const updateCompetition = await db.User.findByIdAndUpdate(id, {
-          $set: { competitions: idComp },
-           });
+    const getUser = await db.User.findById(id);
+    const userCompetition = getUser.competition;
+
+    const getAllCompetitions = await db.Competition.find().populate(
+      'competition'
+    );
+
+    let encryptedInvite;
+
+    getAllCompetitions.forEach((oneCompetition) => {
+      if (oneCompetition._id.toString() === competition) {
+        if (competition.toString() === userCompetition.toString()) {
+          encryptedInvite = bcrypt.hashSync(competition, 6);
         }
+      }
     });
-    return joingGroup;
-  } catch (error) {
-    console.log('error = ', error);
+
+    return encryptedInvite
+      ? encryptedInvite
+      : { error: "Couldn't create an invitation" };
+  } catch (err) {
+    console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
   }
 };
