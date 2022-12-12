@@ -492,7 +492,7 @@ export const changePlayerLineup = async (req, res) => {
   }
 };
 
-export const InviteFrend = async (req, res) => {
+export const InviteFriend = async (req, res) => {
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -500,7 +500,7 @@ export const InviteFrend = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-    let resOrm = await ormUser.InviteFrend(req);
+    let resOrm = await ormUser.InviteFriend(req);
     if (resOrm.err) {
       (status = 'Failure'),
         (errorcode = resOrm.err.code),

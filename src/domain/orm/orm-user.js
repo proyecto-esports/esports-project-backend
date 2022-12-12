@@ -422,22 +422,24 @@ export const benchPlayer = async (req) => {
   }
 };
 
-export const InviteFrend = async (req) => {
+export const InviteFriend = async (req) => {
   try {
     const { id } = req.params;
-    const allCompetitions  = await db.Competition.find()
-    console.log(allCompetitions);
+    const allCompetitions = await db.Competition.find()
     const { competition } = req.body;
-    console.log(competition);
 
-   const joingGroup = allCompetitions._id.forEach(async (idComp) => {
-        if(bcrypt.compareSync(competition, idComp)){
-           const updateCompetition = await db.User.findByIdAndUpdate(id, {
-          $set: { competitions: idComp },
+   const joinGroup = allCompetitions.map(async (idComp) => {
+        if(bcrypt.compareSync(idComp._id.toString(), competition.toString() )){
+         await db.User.findByIdAndUpdate(id, {
+          $set: { competition: idComp._id },
            });
+           const updateCompetition = await db.Competition.findByIdAndUpdate(idComp._id, {
+            $push: { users: id },
+             });
+           return updateCompetition
         }
     });
-    return joingGroup;
+    return joinGroup || {error: "esto no va"};
   } catch (error) {
     console.log('error = ', error);
     return res
