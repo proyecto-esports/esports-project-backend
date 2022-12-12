@@ -50,7 +50,7 @@ export const Login = async (req, res) => {
 
       userInDB.password = null;
 
-      setCookie(req, res, 'refreshToken', accessToken);
+      setCookie(req, res, 'refreshToken', refreshToken);
 
       return { user: userInDB, token: accessToken };
     } else {
@@ -124,6 +124,7 @@ export const GetOne = async (req) => {
   try {
     const { id } = req.params;
     const user = await db.User.findById(id).populate('players lineup competition');
+    console.log(user)
     return user;
   } catch (error) {
     console.log('error = ', error);
