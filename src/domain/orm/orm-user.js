@@ -321,22 +321,28 @@ export const SellPlayer = async (req) => {
   try {
     const { id } = req.params;
     const { player } = req.body;
-
     const getUser = await db.User.findById(id).populate('players');
     const playerToSell = await db.Player.findById(player);
+
     const playerToSellValue = playerToSell.value;
     const reducedValue = playerToSellValue * 0.7;
     const newUserMoney = getUser.money + reducedValue;
-
-    const updatePlayersAndMoney = await db.User.findByIdAndUpdate(
+    const updateMoney = await db.User.findByIdAndUpdate(
       id,
       {
-        $pull: { players: player },
         $set: { money: newUserMoney },
       },
       { new: true }
     );
-    return updatePlayersAndMoney;
+    const updatePlayers = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $pull: { players: player },
+      },
+      { new: true }
+    );
+    console.log(updatePlayers);
+    return updatePlayers;
   } catch (err) {
     console.log('err = ', err);
     return res
@@ -359,14 +365,14 @@ export const changePlayerLineup = async (req) => {
           const addPlayer = await db.User.findByIdAndUpdate(
             id,
             {
-              $push: { lineup: newPlayer },
+              $pull: { lineup: currentPlayer },
             },
             { new: true }
           );
           const removePlayer = await db.User.findByIdAndUpdate(
             id,
             {
-              $pull: { lineup: currentPlayer },
+              $push: { lineup: newPlayer },
             },
             { new: true }
           );
