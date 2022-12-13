@@ -494,7 +494,7 @@ export const changePlayerLineup = async (req, res) => {
   }
 };
 
-export const InviteFriend = async (req, res) => {
+export const JoinGroup = async (req, res) => {
 
   let status = 'Success',
     errorcode = '',
@@ -504,7 +504,7 @@ export const InviteFriend = async (req, res) => {
     response = {};
   try {
 
-    let resOrm = await ormUser.InviteFriend(req);
+    let resOrm = await ormUser.JoinGroup(req);
     if (resOrm.err) {
 
       (status = 'Failure'),

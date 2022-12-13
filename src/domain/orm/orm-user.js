@@ -405,7 +405,6 @@ export const changePlayerLineup = async (req) => {
   }
 };
 
-
 export const benchPlayer = async (req) => {
   try {
     const { id } = req.params;
@@ -424,25 +423,34 @@ export const benchPlayer = async (req) => {
   }
 };
 
-export const InviteFriend = async (req) => {
+export const JoinGroup = async (req) => {
   try {
     const { id } = req.params;
-    const allCompetitions = await db.Competition.find()
+    const allCompetitions = await db.Competition.find();
     const { competition } = req.body;
-
-   const joinGroup = allCompetitions.map(async (idComp) => {
-        if(bcrypt.compareSync(idComp._id.toString(), competition.toString() )){
-         await db.User.findByIdAndUpdate(id, {
-          $set: { competition: idComp._id },
-           });
-           const updateCompetition = await db.Competition.findByIdAndUpdate(idComp._id, {
+    const joinGroup = allCompetitions.map(async (comp) => {
+      if (bcrypt.compareSync(comp._id.toString(), competition)) {
+        const user = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $set: { competition: comp._id },
+          },
+          { new: true }
+        );
+        console.log('new user', user);
+        const updatedCompetition = await db.Competition.findByIdAndUpdate(
+          comp._id,
+          {
             $push: { users: id },
-             });
-           return updateCompetition
-            }
+          },
+          {
+            new: true,
+          }
+        );
+        return updatedCompetition;
       }
     });
-    return joinGroup || {error: "esto no va"};
+    return joinGroup || { error: 'esto no va' };
   } catch (error) {
     console.log('error = ', error);
 
@@ -470,7 +478,7 @@ export const CreateInvitationToGroup = async (req) => {
       if (oneCompetition._id.toString() === competition) {
         if (competition.toString() === userCompetition.toString()) {
           encryptedInvite = bcrypt.hashSync(competition, 6);
-         }
+        }
       }
     });
 
@@ -481,7 +489,4 @@ export const CreateInvitationToGroup = async (req) => {
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
-};  
-          
-
-      
+};

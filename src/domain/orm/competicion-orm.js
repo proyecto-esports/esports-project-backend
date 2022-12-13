@@ -71,10 +71,10 @@ export const GetName = async (req) => {
       'users market'
     );
     console.log(competition);
-    if (!competition) return LogDanger('Cannot get the competition');
+    if (!competition) return LogDanger('Cannot get the name');
     return competition;
   } catch (error) {
-    LogDanger('Cannot get the competition', error);
+    LogDanger('Cannot get the name', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -183,7 +183,7 @@ export const UpdateMarket = async (req) => {
         id,
         {
           $set: {
-            market: randomMarket.slice(0, 1),
+            market: randomMarket.slice(0, 8),
           },
         },
         { new: true }
