@@ -25,17 +25,14 @@ export const Create = async (req, res) => {
 
     const { accessToken, refreshToken } = generateTokens(req, 'admin', user);
 
-    const userUpdated = await db.User.findByIdAndUpdate(
-      userId,
-      {
-        role: 'admin',
-      },
-      { new: true }
-    );
-
     setCookie(req, res, 'refreshToken', refreshToken);
 
     const competition = await new db.Competition(req.body);
+
+    const userUpdated = await db.User.findByIdAndUpdate(userId, {
+      role: 'admin',
+      competition: competition._id,
+    });
 
     const savedCompetition = await competition.save();
 
