@@ -275,27 +275,35 @@ export const UpdateRole = async (req) => {
 export const InicialPlayers = async (req) => {
   try {
     const { id } = req.params;
-    const selectUser = await db.User.findById(id).populate('competition');
-    const competitionId = selectUser.competition;
+
+    const user = await db.User.findById(id).populate({
+      path: 'competition',
+      populate: { path: 'market' },
+    });
+
     const allUser = await db.User.find();
     const allPlayers = await db.Player.find();
-    const marketPlasyers = await db.Competition.findById(competitionId);
-    let disablePlayers = marketPlasyers.market;
+
+    let disabledPlayers = user.competition.market;
+
     allUser.forEach((oneUser) => {
       if (oneUser.players) {
         oneUser.players.forEach((player) => {
-          disablePlayers.push(player);
+          disabledPlayers.push(player);
         });
       }
     });
+
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
-      if (disablePlayers.includes(player._id)) free = false;
+      if (disabledPlayers.includes(player._id)) free = false;
       return free;
     });
+
     const randomPlayers = freePlayers.sort(() => {
       return Math.random() - 0.5;
     });
+
     if (randomPlayers.length) {
       const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
         $set: {
@@ -305,6 +313,7 @@ export const InicialPlayers = async (req) => {
       });
       return playersUserUpdate;
     }
+
     return await {
       error: {
         code: 500,
@@ -312,7 +321,7 @@ export const InicialPlayers = async (req) => {
       },
     };
   } catch (error) {
-    LogDanger('Cannot update the competition', error);
+    LogDanger('Cannot give the initial players', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -423,37 +432,41 @@ export const benchPlayer = async (req) => {
   }
 };
 
-export const JoinGroup = async (req) => {
+export const JoinGroup = async (req, res) => {
   try {
-    const { id } = req.params;
-    const allCompetitions = await db.Competition.find();
-    const { competition } = req.body;
-    const joinGroup = allCompetitions.map(async (comp) => {
-      console.log('comp', comp);
-      console.log('competition', competition);
-      if (bcrypt.compareSync(comp._id.toString(), competition)) {
-        const user = await db.User.findByIdAndUpdate(
-          id,
-          {
-            $set: { competition: comp._id },
-          },
-          {
-            new: true
-          }
-        );
-        const updatedCompetition = await db.Competition.findByIdAndUpdate(
-          comp._id,
-          {
-            $push: { users: id },
-          },
-          {
-            new: true,
-          }
-        );
-        return updatedCompetition;
-      }
+    const { id: userId } = req.params;
+    const { competition: password } = req.body;
+
+    const competitions = await db.Competition.find();
+
+    const competition = competitions.find((competition) => {
+      return bcrypt.compareSync(competition._id.toString(), password);
     });
-    return joinGroup || { error: 'esto no va' };
+
+    if (!competition) return { error: 'The competition code is invalid' };
+
+    const userIsIn = competition.users.find(
+      (user) => user._id.toString() === userId
+    );
+
+    if (userIsIn)
+      return { error: 'The user is already a member of this group' };
+
+    const updatedUser = await db.User.findByIdAndUpdate(
+      userId,
+      {
+        $set: { competition: competition._id },
+      },
+      {
+        new: true,
+      }
+    );
+
+    await db.Competition.findByIdAndUpdate(competition._id, {
+      $push: { users: userId },
+    });
+
+    return updatedUser;
   } catch (error) {
     console.log('error = ', error);
     return res
