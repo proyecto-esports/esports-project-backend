@@ -429,15 +429,18 @@ export const JoinGroup = async (req) => {
     const allCompetitions = await db.Competition.find();
     const { competition } = req.body;
     const joinGroup = allCompetitions.map(async (comp) => {
+      console.log('comp', comp);
+      console.log('competition', competition);
       if (bcrypt.compareSync(comp._id.toString(), competition)) {
         const user = await db.User.findByIdAndUpdate(
           id,
           {
             $set: { competition: comp._id },
           },
-          { new: true }
+          {
+            new: true
+          }
         );
-        console.log('new user', user);
         const updatedCompetition = await db.Competition.findByIdAndUpdate(
           comp._id,
           {
@@ -453,7 +456,6 @@ export const JoinGroup = async (req) => {
     return joinGroup || { error: 'esto no va' };
   } catch (error) {
     console.log('error = ', error);
-
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
