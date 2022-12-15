@@ -36,6 +36,10 @@ export const Create = async (req, res) => {
 
     const savedCompetition = await competition.save();
 
+    const competitionPopulated = db.Competition.populate(savedCompetition, {
+      path: 'users market',
+    });
+
     return {
       competition: savedCompetition,
       user: userUpdated,
