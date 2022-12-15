@@ -495,7 +495,6 @@ export const changePlayerLineup = async (req, res) => {
 };
 
 export const JoinGroup = async (req, res) => {
-
   let status = 'Success',
     errorcode = '',
     message = '',
@@ -503,8 +502,7 @@ export const JoinGroup = async (req, res) => {
     statuscode = 0,
     response = {};
   try {
-
-    let resOrm = await ormUser.JoinGroup(req);
+    let resOrm = await ormUser.JoinGroup(req, res);
     if (resOrm.err) {
 
       (status = 'Failure'),
