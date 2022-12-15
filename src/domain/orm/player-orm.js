@@ -89,7 +89,7 @@ export const ChangePoints = async (req) => {
       let kills = Math.floor(Math.random() * (50 + 1));
       let deads = Math.floor(Math.random() * (14 + 1));
       let asists = Math.floor(Math.random() * (50 + 1));
-      let dmg = Math.floor(Math.random() * (750 + 1));
+      let dmg = Math.floor(Math.random() * (7000 + 1));
       let id = player._id;
       const updatedPlayer = await db.Player.findByIdAndUpdate(id, {
         stats: {
