@@ -37,7 +37,9 @@ export const Create = async (req) => {
 
 export const Login = async (req, res) => {
   try {
-    const userInDB = await db.User.findOne({ gmail: req.body.gmail });
+    const userInDB = await db.User.findOne({ gmail: req.body.gmail }).populate({
+      path: 'players lineup competition',
+    });
 
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
