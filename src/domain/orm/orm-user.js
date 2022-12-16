@@ -212,12 +212,12 @@ export const UpdatePlayersMoney = async (req) => {
   try {
     const { id } = req.params;
     const { money } = req.body;
-    const playersUser = await db.User.findById(id);
-    let userMoney = playersUser.money + money;
 
     const updatePlayersMoney = await db.User.findByIdAndUpdate(id, {
-      $set: { money: userMoney },
-    });
+      $inc: { money: money },
+    },
+    {new: true}
+    )
     return updatePlayersMoney;
   } catch (error) {
     console.log('error = ', error);
