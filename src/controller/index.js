@@ -20,7 +20,7 @@ router.get('/users/:id', user.GetOne);
 router.put('/users/:id', user.UpdateUsersPlayers);
 router.put('/users/lineup/:id', user.UpdateLineup);
 router.put('/users/points/:id', user.UpdateUsersPoints);
-router.put('/users/money/:id', user.UpdatePlayersMoney);
+router.patch('/users/money/:id', user.UpdatePlayersMoney);
 router.put('/users/competition/:id', user.UpdateCompetition);
 router.put('/users/inicialplayers/:id', user.InicialPlayers);
 router.patch('/users/:id/invited', user.JoinGroup);
