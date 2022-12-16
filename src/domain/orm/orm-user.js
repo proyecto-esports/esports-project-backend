@@ -511,7 +511,7 @@ export const RetrivePassword = async (req) => {
       from: process.env.MAIL_USERNAME,
       to: gmail,
       subject: 'Retrive password',
-      text: `Hi friend! We found out that you forgot your password. Keep calm, enter this  temporary password, and as soon as you can, change it. The code is ${newUser.password} Thank you 👋🏽.`,
+      text: `Hi friend! We found out that you forgot your password. Keep calm, enter this  temporary password, and as soon as you can, change it. The code is ${password} Thank you 👋🏽.`,
     };
     transporter.sendMail(mailOptions, function (error, data) {
       if (error) {
