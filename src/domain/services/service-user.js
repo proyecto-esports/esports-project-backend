@@ -427,7 +427,6 @@ export const InicialPlayers = async (req, res) => {
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (error) {
-
     console.log('error = ', error);
 
     return res
@@ -504,11 +503,9 @@ export const JoinGroup = async (req, res) => {
   try {
     let resOrm = await ormUser.JoinGroup(req, res);
     if (resOrm.err) {
-
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
         (message = 'There is not such competition'),
-
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
@@ -518,7 +515,6 @@ export const JoinGroup = async (req, res) => {
     response = await ResponseService(status, errorcode, message, data);
     return res.status(statuscode).send(response);
   } catch (error) {
-
     console.log('error = ', error);
 
     return res
@@ -526,7 +522,6 @@ export const JoinGroup = async (req, res) => {
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
   }
 };
-
 
 export const benchPlayer = async (req, res) => {
   let status = 'Success',
@@ -573,6 +568,35 @@ export const CreateInvitationToGroup = async (req, res) => {
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_CREATED);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    console.log('err = ', error);
+    return res
+      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
+      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
+  }
+};
+
+export const RetrivePassword = async (req, res) => {
+  let status = 'Success',
+    errorcode = '',
+    message = '',
+    data = '',
+    statuscode = 0,
+    response = {};
+  try {
+    let resOrm = await ormUser.RetrivePassword(req);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = 'Unregistered user'),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'code sent'),
         (data = resOrm),
         (statuscode = enum_.CODE_CREATED);
     }

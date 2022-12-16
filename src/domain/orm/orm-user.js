@@ -8,9 +8,9 @@ import {
   LogSuccess,
   LogWarning,
 } from '../../utils/magic.js';
-import { log } from 'config-yml';
 import setCookie from '../../utils/helpers/tokenManipulation.js';
 import { generateTokens } from './../../utils/helpers/generateTokens.js';
+import transporter from '../../utils/helpers/nodemailer.js';
 
 const db = conn.connMongo;
 
@@ -58,21 +58,6 @@ export const Login = async (req, res) => {
     }
   } catch (error) {
     LogDanger('User login failed', error);
-    return await { error: { code: 123, message: error } };
-  }
-};
-
-export const Logout = async (req, res) => {
-  try {
-    try {
-      res.cookie('refreshToken', null);
-    } catch (error) {
-      console.log(error);
-    }
-
-    return 'User logout successfully';
-  } catch (error) {
-    LogDanger('User logout failed', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -503,5 +488,39 @@ export const CreateInvitationToGroup = async (req) => {
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
+  }
+};
+
+export const RetrivePassword = async (req) => {
+  try {
+    const { gmail } = req.params;
+    const user = await db.User.find({ gmail: gmail });
+    if (!user) return LogDanger('Unregistered user');
+    const newUser = user[0];
+    const password = Math.round(Math.random() * 99999999);
+    newUser.password = password;
+    const id = newUser._id.toString();
+    if (newUser.password) {
+      newUser.password = bcrypt.hashSync(newUser.password, 6);
+    }
+    const updatedUser = await db.User.findByIdAndUpdate(id, newUser);
+
+    let mailOptions = {
+      from: process.env.MAIL_USERNAME,
+      to: gmail,
+      subject: 'Retrive password',
+      text: `Hi friend! We found out that you forgot your password. Keep calm, enter this  temporary password, and as soon as you can, change it. The code is ${newUser.password} Thank you 👋🏽.`,
+    };
+    transporter.sendMail(mailOptions, function (error, data) {
+      if (error) {
+        console.log('Error', error);
+      } else {
+        console.log('Email sent successfully: ' + data.response);
+      }
+    });
+    return updatedUser;
+  } catch (error) {
+    LogDanger('Cannot get the code', error);
+    return await { error: { code: 123, message: error } };
   }
 };
