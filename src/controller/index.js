@@ -1,8 +1,8 @@
 import express from 'express';
 import upload from '../utils/middlewares/file.js';
-import * as user from '../domain/services/service-user.js';
+import * as user from '../domain/services/user-service.js';
 import * as competition from '../domain/services/competicion-service.js';
-import * as bid from '../domain/services/service-bid.js';
+import * as bid from '../domain/services/bid-service.js';
 import * as player from './../domain/services/player-service.js';
 import isAdmin from '../utils/middlewares/admin-auth-middleware.js';
 import isUser from '../utils/middlewares/user-auth-middleware.js';
@@ -19,7 +19,7 @@ router.patch('/users/:id', user.Update);
 router.get('/users/:id', user.GetOne);
 router.put('/users/:id', user.UpdateUsersPlayers);
 router.put('/users/lineup/:id', user.UpdateLineup);
-router.put('/users/points/:id', user.UpdateUsersPoints);
+router.put('/users/points/:id', [isAdmin], user.UpdateUsersPoints);
 router.patch('/users/money/:id', user.UpdatePlayersMoney);
 router.put('/users/competition/:id', user.UpdateCompetition);
 router.put('/users/inicialplayers/:id', user.InicialPlayers);
@@ -47,7 +47,7 @@ router.get('/competitions/:id', competition.GetOne);
 router.get('/competitions/name/:name', competition.GetName);
 router.patch('/competitions/:id', competition.Update);
 router.put('/competitions/:id', competition.UpdateUsers);
-router.patch('/competitions/:id/market', competition.UpdateMarket);
+router.patch('/competitions/:id/market', [isAdmin], competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
 router.get('/google', (req, res) => res.send(req.user));
 

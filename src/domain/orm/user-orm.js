@@ -9,7 +9,7 @@ import {
   LogWarning,
 } from '../../utils/magic.js';
 import setCookie from '../../utils/helpers/tokenManipulation.js';
-import { generateTokens } from './../../utils/helpers/generateTokens.js';
+import { generateTokens } from '../../utils/helpers/generateTokens.js';
 import transporter from '../../utils/helpers/nodemailer.js';
 
 const db = conn.connMongo;
