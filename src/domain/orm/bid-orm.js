@@ -6,7 +6,6 @@ const db = conn.connMongo;
 export const GetAll = async () => {
   try {
     const bids = await db.Bid.find().populate('player');
-    console.log('bids', bids);
     return bids;
   } catch (error) {
     LogDanger('Cannot getAll bids', error);
