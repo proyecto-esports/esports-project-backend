@@ -1,10 +1,10 @@
 const setError = (code, message) => {
   console.log(code, message);
-  const err = new Error();
+  const error = new Error();
 
-  err.code = code;
-  err.message = message;
-  return err;
+  error.code = code;
+  error.message = message;
+  return error;
 };
 
 export default setError;

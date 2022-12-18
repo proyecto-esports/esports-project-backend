@@ -25,19 +25,20 @@ export const Create = async (req, res) => {
 
     const { accessToken, refreshToken } = generateTokens(req, 'admin', user);
 
-    const userUpdated = await db.User.findByIdAndUpdate(
-      userId,
-      {
-        role: 'admin',
-      },
-      { new: true }
-    );
-
     setCookie(req, res, 'refreshToken', refreshToken);
 
     const competition = await new db.Competition(req.body);
 
+    const userUpdated = await db.User.findByIdAndUpdate(userId, {
+      role: 'admin',
+      competition: competition._id,
+    });
+
     const savedCompetition = await competition.save();
+
+    const competitionPopulated = db.Competition.populate(savedCompetition, {
+      path: 'users market',
+    });
 
     return {
       competition: savedCompetition,
@@ -71,10 +72,10 @@ export const GetName = async (req) => {
       'users market'
     );
     console.log(competition);
-    if (!competition) return LogDanger('Cannot get the competition');
+    if (!competition) return LogDanger('Cannot get the name');
     return competition;
   } catch (error) {
-    LogDanger('Cannot get the competition', error);
+    LogDanger('Cannot get the name', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -152,6 +153,8 @@ export const UpdateMarket = async (req) => {
           await db.Player.findByIdAndUpdate(player._id, {
             $unset: { bids: [] },
           });
+
+          await db.Bid.findByIdAndDelete(bid._id);
         });
       }
     });
@@ -181,7 +184,7 @@ export const UpdateMarket = async (req) => {
         id,
         {
           $set: {
-            market: randomMarket.slice(0, 1),
+            market: randomMarket.slice(0, 8),
           },
         },
         { new: true }
