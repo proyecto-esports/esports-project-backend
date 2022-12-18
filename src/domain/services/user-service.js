@@ -564,7 +564,7 @@ export const CreateInvitationToGroup = async (req, res) => {
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = 'There is not such competition'),
+        (message = resOrm.error.message),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),

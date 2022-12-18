@@ -27,7 +27,7 @@ router.patch('/users/:id/invited', user.JoinGroup);
 router.put('/users/role/:id', user.UpdateRole);
 router.put('/users/sell/:id', user.SellPlayer);
 router.put('/users/changeLineUp/:id', user.changePlayerLineup);
-router.get('/users/generateinvite/:id', user.CreateInvitationToGroup);
+router.post('/users/generateinvite/:id', user.CreateInvitationToGroup);
 router.get('/users/benchPlayers/:id', user.benchPlayer);
 router.patch('/users/retrive/:gmail', user.RetrivePassword);
 router.get('/bids', bid.GetAll);

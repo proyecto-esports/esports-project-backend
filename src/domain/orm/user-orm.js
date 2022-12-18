@@ -113,7 +113,6 @@ export const GetOne = async (req) => {
     const user = await db.User.findById(id).populate(
       'players lineup competition'
     );
-    console.log(user);
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -374,8 +373,7 @@ export const changePlayerLineup = async (req) => {
             },
             { new: true }
           );
-          console.log('ADD', addPlayer);
-          console.log('Rem', removePlayer);
+
           return removePlayer;
         } else {
           LogDanger('That player already lineup.');
@@ -466,19 +464,20 @@ export const JoinGroup = async (req, res) => {
 
 export const CreateInvitationToGroup = async (req) => {
   try {
+    console.log(req);
     const { id } = req.params;
     const { competition } = req.body;
-
-    const getUser = await db.User.findById(id);
-    const userCompetition = getUser.competition;
-
+    console.log('id', id);
+    const user = await db.User.findById(id);
+    if (!user)
+      return { error: { message: 'The user is not in the competition' } };
+    const userCompetition = user.competition;
     const getAllCompetitions = await db.Competition.find().populate(
       'competition'
     );
-
     let encryptedInvite;
 
-    getAllCompetitions.forEach((oneCompetition) => {
+    getAllCompetitions.forEach((oneCompetition, i) => {
       if (oneCompetition._id.toString() === competition) {
         if (competition.toString() === userCompetition.toString()) {
           encryptedInvite = bcrypt.hashSync(competition, 6);
@@ -486,7 +485,9 @@ export const CreateInvitationToGroup = async (req) => {
       }
     });
 
-    return encryptedInvite || { error: "Couldn't create an invitation" };
+    return (
+      encryptedInvite || { error: { message: "Couldn't create an invitation" } }
+    );
   } catch (error) {
     console.log('error = ', error);
     return res
