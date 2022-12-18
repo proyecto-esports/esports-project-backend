@@ -213,11 +213,13 @@ export const UpdatePlayersMoney = async (req) => {
     const { id } = req.params;
     const { money } = req.body;
 
-    const updatePlayersMoney = await db.User.findByIdAndUpdate(id, {
-      $inc: { money: money },
-    },
-    {new: true}
-    )
+    const updatePlayersMoney = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $inc: { money: money },
+      },
+      { new: true }
+    );
     return updatePlayersMoney;
   } catch (error) {
     console.log('error = ', error);
@@ -464,19 +466,27 @@ export const JoinGroup = async (req, res) => {
 
 export const CreateInvitationToGroup = async (req) => {
   try {
+    console.log(req);
     const { id } = req.params;
     const { competition } = req.body;
-
-    const getUser = await db.User.findById(id);
-    const userCompetition = getUser.competition;
+    console.log('id', id);
+    const user = await db.User.findById(id);
+    if (!user)
+      return { error: { message: 'The user is not in the competition' } };
+    // console.log('getUser', getUser);
+    const userCompetition = user.competition;
 
     const getAllCompetitions = await db.Competition.find().populate(
       'competition'
     );
-
+    // console.log('getAllCompetitions', getAllCompetitions);
     let encryptedInvite;
 
-    getAllCompetitions.forEach((oneCompetition) => {
+    getAllCompetitions.forEach((oneCompetition, i) => {
+      // console.log('oneCompetition', oneCompetition);
+      console.log('INDEX', i);
+      console.log('oneCompetitionId', oneCompetition._id.toString());
+      console.log('competition', competition);
       if (oneCompetition._id.toString() === competition) {
         if (competition.toString() === userCompetition.toString()) {
           encryptedInvite = bcrypt.hashSync(competition, 6);
@@ -484,7 +494,9 @@ export const CreateInvitationToGroup = async (req) => {
       }
     });
 
-    return encryptedInvite || { error: "Couldn't create an invitation" };
+    return (
+      encryptedInvite || { error: { message: "Couldn't create an invitation" } }
+    );
   } catch (error) {
     console.log('error = ', error);
     return res
