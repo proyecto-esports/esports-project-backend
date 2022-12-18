@@ -73,15 +73,18 @@ export const GetAll = async () => {
   }
 };
 
-export const Update = async (req) => {
+export const Update = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = new db.User(req.body);
-    user._id = id;
-    if (user.password) {
-      user.password = bcrypt.hashSync(user.password, 6);
+    const { password } = req.body;
+    let newPass;
+
+    if (password) {
+      newPass = bcrypt.hashSync(password, 6);
     }
-    const updatedUser = await db.User.findByIdAndUpdate(id, user);
+    const updatedUser = await db.User.findByIdAndUpdate(id, {
+      $set: { password: newPass },
+    });
     return updatedUser;
   } catch (error) {
     console.log('error = ', error);
