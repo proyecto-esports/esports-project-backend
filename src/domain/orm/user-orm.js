@@ -113,7 +113,6 @@ export const GetOne = async (req) => {
     const user = await db.User.findById(id).populate(
       'players lineup competition'
     );
-    console.log(user);
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -374,8 +373,7 @@ export const changePlayerLineup = async (req) => {
             },
             { new: true }
           );
-          console.log('ADD', addPlayer);
-          console.log('Rem', removePlayer);
+
           return removePlayer;
         } else {
           LogDanger('That player already lineup.');
@@ -473,20 +471,13 @@ export const CreateInvitationToGroup = async (req) => {
     const user = await db.User.findById(id);
     if (!user)
       return { error: { message: 'The user is not in the competition' } };
-    // console.log('getUser', getUser);
     const userCompetition = user.competition;
-
     const getAllCompetitions = await db.Competition.find().populate(
       'competition'
     );
-    // console.log('getAllCompetitions', getAllCompetitions);
     let encryptedInvite;
 
     getAllCompetitions.forEach((oneCompetition, i) => {
-      // console.log('oneCompetition', oneCompetition);
-      console.log('INDEX', i);
-      console.log('oneCompetitionId', oneCompetition._id.toString());
-      console.log('competition', competition);
       if (oneCompetition._id.toString() === competition) {
         if (competition.toString() === userCompetition.toString()) {
           encryptedInvite = bcrypt.hashSync(competition, 6);
