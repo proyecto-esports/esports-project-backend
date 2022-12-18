@@ -17,8 +17,8 @@ export const GetAll = async () => {
 
 export const Create = async (req, res) => {
   try {
-    console.log(req);
     req.body.users = JSON.parse(req.body.users);
+
     const userId = req.body.users[0];
 
     const user = await db.User.findById(userId);

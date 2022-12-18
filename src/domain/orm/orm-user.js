@@ -8,9 +8,9 @@ import {
   LogSuccess,
   LogWarning,
 } from '../../utils/magic.js';
+import { log } from 'config-yml';
 import setCookie from '../../utils/helpers/tokenManipulation.js';
-import { generateTokens } from '../../utils/helpers/generateTokens.js';
-import transporter from '../../utils/helpers/nodemailer.js';
+import { generateTokens } from './../../utils/helpers/generateTokens.js';
 
 const db = conn.connMongo;
 
@@ -37,10 +37,8 @@ export const Create = async (req) => {
 
 export const Login = async (req, res) => {
   try {
-    const userInDB = await db.User.findOne({ gmail: req.body.gmail }).populate({
-      path: 'players lineup competition',
-    });
-    console.log('userInDB', userInDB);
+    const userInDB = await db.User.findOne({ gmail: req.body.gmail });
+
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
     if (bcrypt.compareSync(req.body.password, userInDB.password)) {
@@ -64,6 +62,21 @@ export const Login = async (req, res) => {
   }
 };
 
+export const Logout = async (req, res) => {
+  try {
+    try {
+      res.cookie('refreshToken', null);
+    } catch (error) {
+      console.log(error);
+    }
+
+    return 'User logout successfully';
+  } catch (error) {
+    LogDanger('User logout failed', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
 export const GetAll = async () => {
   try {
     return await db.User.find();
@@ -73,20 +86,15 @@ export const GetAll = async () => {
   }
 };
 
-export const Update = async (req, res) => {
+export const Update = async (req) => {
   try {
     const { id } = req.params;
-    const { password } = req.body;
-    let newPass;
-
-    if (password) {
-      newPass = bcrypt.hashSync(password, 6);
+    const user = new db.User(req.body);
+    user._id = id;
+    if (user.password) {
+      user.password = bcrypt.hashSync(user.password, 6);
     }
-    
-    const updatedUser = await db.User.findByIdAndUpdate(id, {
-      $set: { password: newPass },
-    });
-
+    const updatedUser = await db.User.findByIdAndUpdate(id, user);
     return updatedUser;
   } catch (error) {
     console.log('error = ', error);
@@ -115,9 +123,8 @@ export const Delete = async (req) => {
 export const GetOne = async (req) => {
   try {
     const { id } = req.params;
-    const user = await db.User.findById(id).populate(
-      'players lineup competition'
-    );
+    const user = await db.User.findById(id).populate('players lineup competition');
+    console.log(user)
     return user;
   } catch (error) {
     console.log('error = ', error);
@@ -186,24 +193,25 @@ export const UpdateLineup = async (req) => {
 export const UpdateUsersPoints = async (req) => {
   try {
     const { id } = req.params;
-    const users = await db.Competition.findById(id);
+    const users = await db.Competition.findById(id)
 
-    users.users.forEach((user) => {
+    
+       users.users.forEach((user)=> {
       const extracLine = async () => {
-        let totalPoints = 0;
-        const line = await db.User.findById(user).populate('lineup');
-        line.lineup.forEach((player) => {
-          totalPoints += player.points;
-        });
-        const updatepoints = await db.User.findByIdAndUpdate(user, {
-          $inc: { points: totalPoints },
-        });
-        return updatepoints;
-      };
-
-      extracLine();
-    });
-    return 'Funsiona';
+      let totalPoints = 0  
+      const line = await db.User.findById(user).populate('lineup')
+      line.lineup.forEach((player)=> {
+        totalPoints += player.points
+      })
+      const updatepoints = await db.User.findByIdAndUpdate(user, {
+        $inc: { points: totalPoints },
+      });
+      return updatepoints
+    }
+    
+        extracLine()
+    })
+    return "Funsiona"
   } catch (error) {
     console.log('error = ', error);
     return res
@@ -216,14 +224,12 @@ export const UpdatePlayersMoney = async (req) => {
   try {
     const { id } = req.params;
     const { money } = req.body;
+    const playersUser = await db.User.findById(id);
+    let userMoney = playersUser.money + money;
 
-    const updatePlayersMoney = await db.User.findByIdAndUpdate(
-      id,
-      {
-        $inc: { money: money },
-      },
-      { new: true }
-    );
+    const updatePlayersMoney = await db.User.findByIdAndUpdate(id, {
+      $set: { money: userMoney },
+    });
     return updatePlayersMoney;
   } catch (error) {
     console.log('error = ', error);
@@ -268,45 +274,35 @@ export const UpdateRole = async (req) => {
 export const InicialPlayers = async (req) => {
   try {
     const { id } = req.params;
-
-    const user = await db.User.findById(id).populate({
-      path: 'competition',
-      populate: { path: 'market' },
-    });
-
+    const selectUser = await db.User.findById(id).populate('competition');
+    const competitionId = selectUser.competition;
     const allUser = await db.User.find();
     const allPlayers = await db.Player.find();
-
-    let disabledPlayers = user.competition.market;
-
+    const marketPlasyers = await db.Competition.findById(competitionId);
+    let disablePlayers = marketPlasyers.market;
     allUser.forEach((oneUser) => {
       if (oneUser.players) {
         oneUser.players.forEach((player) => {
-          disabledPlayers.push(player);
+          disablePlayers.push(player);
         });
       }
     });
-
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
-      if (disabledPlayers.includes(player._id)) free = false;
+      if (disablePlayers.includes(player._id)) free = false;
       return free;
     });
-
     const randomPlayers = freePlayers.sort(() => {
       return Math.random() - 0.5;
     });
-
     if (randomPlayers.length) {
       const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
         $set: {
           players: randomPlayers.slice(0, 5),
-          lineup: randomPlayers.slice(0, 5),
         },
       });
       return playersUserUpdate;
     }
-
     return await {
       error: {
         code: 500,
@@ -314,7 +310,7 @@ export const InicialPlayers = async (req) => {
       },
     };
   } catch (error) {
-    LogDanger('Cannot give the initial players', error);
+    LogDanger('Cannot update the competition', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -323,29 +319,24 @@ export const SellPlayer = async (req) => {
   try {
     const { id } = req.params;
     const { player } = req.body;
+
     const getUser = await db.User.findById(id).populate('players');
     const playerToSell = await db.Player.findById(player);
-
     const playerToSellValue = playerToSell.value;
     const reducedValue = playerToSellValue * 0.7;
     const newUserMoney = getUser.money + reducedValue;
-    const updateMoney = await db.User.findByIdAndUpdate(
+
+    const updatePlayersAndMoney = await db.User.findByIdAndUpdate(
       id,
       {
+        $pull: { players: player },
         $set: { money: newUserMoney },
       },
       { new: true }
     );
-    const updatePlayers = await db.User.findByIdAndUpdate(
-      id,
-      {
-        $pull: { players: player },
-      },
-      { new: true }
-    );
-    return updatePlayers;
-  } catch (error) {
-    console.log('err = ', error);
+    return updatePlayersAndMoney;
+  } catch (err) {
+    console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
@@ -361,34 +352,28 @@ export const changePlayerLineup = async (req) => {
     const lineupUser = user.lineup;
 
     if (lineupUser.length) {
-      if (lineupUser.length > 4) {
-        if (!lineupUser.includes(newPlayer)) {
-          const addPlayer = await db.User.findByIdAndUpdate(
-            id,
-            {
-              $pull: { lineup: currentPlayer },
-            },
-            { new: true }
-          );
-          const removePlayer = await db.User.findByIdAndUpdate(
-            id,
-            {
-              $push: { lineup: newPlayer },
-            },
-            { new: true }
-          );
-
-          return removePlayer;
-        } else {
-          LogDanger('That player already lineup.');
-          return await {
-            error: { code: 123, message: 'That player already lineup.' },
-          };
-        }
+      if (!lineupUser.includes(newPlayer)) {
+        const addPlayer = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $push: { lineup: newPlayer },
+            // $pull: { lineup: currentPlayer },
+          },
+          { new: true }
+        );
+        const removePlayer = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $pull: { lineup: currentPlayer },
+          },
+          { new: true }
+        );
+        console.log(removePlayer);
+        return removePlayer;
       } else {
-        LogDanger('The lineup has already five player.');
+        LogDanger('That player already lineup');
         return await {
-          error: { code: 123, message: 'That player already lineup.' },
+          error: { code: 123, message: 'That player already lineup' },
         };
       }
     } else {
@@ -397,137 +382,10 @@ export const changePlayerLineup = async (req) => {
         error: { code: 123, message: 'That player already lineup' },
       };
     }
-  } catch (error) {
-    console.log('error = ', error);
+  } catch (err) {
+    console.log('err = ', err);
     return res
       .status(enum_.CODE_INTERNAL_SERVER_ERROR)
       .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
-  }
-};
-
-export const benchPlayer = async (req) => {
-  try {
-    const { id } = req.params;
-    const user = await db.User.findById(id).populate('players lineup');
-    const bench = user.players.filter((player) => {
-      let free = true;
-      user.lineup.forEach((lineupPlayer) => {
-        if (lineupPlayer.nickname === player.nickname) free = false;
-      });
-      return free;
-    });
-    return bench;
-  } catch (error) {
-    LogDanger('Cannot update the bench', error);
-    return await { error: { code: 123, message: error } };
-  }
-};
-
-export const JoinGroup = async (req, res) => {
-  try {
-    const { id: userId } = req.params;
-    const { competition: password } = req.body;
-
-    const competitions = await db.Competition.find();
-
-    const competition = competitions.find((competition) => {
-      return bcrypt.compareSync(competition._id.toString(), password);
-    });
-
-    if (!competition) return { error: 'The competition code is invalid' };
-
-    const userIsIn = competition.users.find(
-      (user) => user._id.toString() === userId
-    );
-
-    if (userIsIn)
-      return { error: 'The user is already a member of this group' };
-
-    const updatedUser = await db.User.findByIdAndUpdate(
-      userId,
-      {
-        $set: { competition: competition._id },
-      },
-      {
-        new: true,
-      }
-    );
-
-    await db.Competition.findByIdAndUpdate(competition._id, {
-      $push: { users: userId },
-    });
-
-    return updatedUser;
-  } catch (error) {
-    console.log('error = ', error);
-    return res
-      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'err', ''));
-  }
-};
-
-export const CreateInvitationToGroup = async (req) => {
-  try {
-    const { id } = req.params;
-    const { competition } = req.body;
-    const user = await db.User.findById(id);
-    if (!user)
-      return { error: { message: 'The user is not in the competition' } };
-    const userCompetition = user.competition;
-    const getAllCompetitions = await db.Competition.find().populate(
-      'competition'
-    );
-    let encryptedInvite;
-
-    getAllCompetitions.forEach((oneCompetition, i) => {
-      if (oneCompetition._id.toString() === competition) {
-        if (competition.toString() === userCompetition.toString()) {
-          encryptedInvite = bcrypt.hashSync(competition, 6);
-        }
-      }
-    });
-
-    return (
-      encryptedInvite || { error: { message: "Couldn't create an invitation" } }
-    );
-  } catch (error) {
-    console.log('error = ', error);
-    return res
-      .status(enum_.CODE_INTERNAL_SERVER_ERROR)
-      .send(await ResponseService('Failure', enum_.CRASH_LOGIC, 'error', ''));
-  }
-};
-
-export const RetrivePassword = async (req) => {
-  try {
-    const { gmail } = req.params;
-    const user = await db.User.find({ gmail: gmail });
-    if (!user) return LogDanger('Unregistered user');
-    const newUser = user[0];
-    const password = Math.round(Math.random() * 99999999);
-    newUser.password = password;
-    const id = newUser._id.toString();
-    if (newUser.password) {
-      newUser.password = bcrypt.hashSync(newUser.password, 6);
-    }
-    const updatedUser = await db.User.findByIdAndUpdate(id, newUser);
-
-    let mailOptions = {
-      from: process.env.MAIL_USERNAME,
-      to: gmail,
-      subject: 'Retrive password',
-      text: `Hi friend! We found out that you forgot your password. Keep calm, enter this  temporary password, and as soon as you can, change it. The code is ${password} Thank you 👋🏽.`,
-    };
-    transporter.sendMail(mailOptions, function (error, data) {
-      if (error) {
-        console.log('Error', error);
-      } else {
-        console.log('Email sent successfully: ' + data.response);
-      }
-    });
-    return updatedUser;
-  } catch (error) {
-    LogDanger('Cannot get the code', error);
-    return await { error: { code: 123, message: error } };
   }
 };
