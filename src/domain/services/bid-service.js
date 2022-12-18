@@ -1,6 +1,6 @@
 import { ResponseService } from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
-import * as ormBid from '../../domain/orm/orm-bid.js';
+import * as ormBid from '../orm/bid-orm.js';
 import { LogDanger } from '../../utils/magic.js';
 
 export const GetAll = async (req, res) => {
