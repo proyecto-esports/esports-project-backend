@@ -6,7 +6,7 @@ import {
 } from '../../utils/magic.js';
 import { ResponseService } from '../../utils/magic.js';
 import * as enum_ from '../../utils/enum.js';
-import * as ormUser from '../orm/orm-user.js';
+import * as ormUser from '../orm/user-orm.js';
 
 export const GetAll = async (req, res) => {
   let status = 'Success';
@@ -505,7 +505,7 @@ export const JoinGroup = async (req, res) => {
     if (resOrm.err) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
-        (message = 'There is not such competition'),
+        (message = 'There is not such competition to join'),
         (statuscode = enum_.CODE_BAD_REQUEST);
     } else {
       (message = 'User updated'),

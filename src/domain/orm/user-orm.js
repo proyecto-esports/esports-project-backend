@@ -9,7 +9,7 @@ import {
   LogWarning,
 } from '../../utils/magic.js';
 import setCookie from '../../utils/helpers/tokenManipulation.js';
-import { generateTokens } from './../../utils/helpers/generateTokens.js';
+import { generateTokens } from '../../utils/helpers/generateTokens.js';
 import transporter from '../../utils/helpers/nodemailer.js';
 
 const db = conn.connMongo;
@@ -213,11 +213,13 @@ export const UpdatePlayersMoney = async (req) => {
     const { id } = req.params;
     const { money } = req.body;
 
-    const updatePlayersMoney = await db.User.findByIdAndUpdate(id, {
-      $inc: { money: money },
-    },
-    {new: true}
-    )
+    const updatePlayersMoney = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $inc: { money: money },
+      },
+      { new: true }
+    );
     return updatePlayersMoney;
   } catch (error) {
     console.log('error = ', error);
