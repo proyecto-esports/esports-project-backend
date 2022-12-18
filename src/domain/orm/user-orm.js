@@ -40,7 +40,7 @@ export const Login = async (req, res) => {
     const userInDB = await db.User.findOne({ gmail: req.body.gmail }).populate({
       path: 'players lineup competition',
     });
-
+    console.log('userInDB', userInDB);
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
     if (bcrypt.compareSync(req.body.password, userInDB.password)) {
@@ -81,7 +81,10 @@ export const Update = async (req) => {
     if (user.password) {
       user.password = bcrypt.hashSync(user.password, 6);
     }
-    const updatedUser = await db.User.findByIdAndUpdate(id, user);
+    const updatedUser = await db.User.findByIdAndUpdate(id, user, {
+      new: true,
+    });
+    console.log('updatedUser', updatedUser);
     return updatedUser;
   } catch (error) {
     console.log('error = ', error);
@@ -338,7 +341,6 @@ export const SellPlayer = async (req) => {
       },
       { new: true }
     );
-    console.log(updatePlayers);
     return updatePlayers;
   } catch (error) {
     console.log('err = ', error);
@@ -464,10 +466,8 @@ export const JoinGroup = async (req, res) => {
 
 export const CreateInvitationToGroup = async (req) => {
   try {
-    console.log(req);
     const { id } = req.params;
     const { competition } = req.body;
-    console.log('id', id);
     const user = await db.User.findById(id);
     if (!user)
       return { error: { message: 'The user is not in the competition' } };

@@ -19,7 +19,7 @@ router.patch('/users/:id', user.Update);
 router.get('/users/:id', user.GetOne);
 router.put('/users/:id', user.UpdateUsersPlayers);
 router.put('/users/lineup/:id', user.UpdateLineup);
-router.put('/users/points/:id', [isAdmin], user.UpdateUsersPoints);
+router.put('/users/points/:id', user.UpdateUsersPoints);
 router.patch('/users/money/:id', user.UpdatePlayersMoney);
 router.put('/users/competition/:id', user.UpdateCompetition);
 router.put('/users/inicialplayers/:id', user.InicialPlayers);
@@ -47,7 +47,7 @@ router.get('/competitions/:id', competition.GetOne);
 router.get('/competitions/name/:name', competition.GetName);
 router.patch('/competitions/:id', competition.Update);
 router.put('/competitions/:id', competition.UpdateUsers);
-router.patch('/competitions/:id/market', [isAdmin], competition.UpdateMarket);
+router.patch('/competitions/:id/market', competition.UpdateMarket);
 router.delete('/competitions/:id', competition.Delete);
 router.get('/google', (req, res) => res.send(req.user));
 
