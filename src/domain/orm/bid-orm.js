@@ -128,9 +128,13 @@ const Update = async (existentBid, money) => {
       { new: true }
     );
 
-    await db.User.findByIdAndUpdate(user._id, {
-      $inc: { money: existentBid.money - money },
-    });
+    await db.User.findByIdAndUpdate(
+      user._id,
+      {
+        $inc: { money: existentBid.money - money },
+      },
+      { new: true }
+    );
 
     return updatedBid;
   } catch (error) {
@@ -144,9 +148,13 @@ export const DeleteAll = async (req) => {
     const allBids = await db.Bid.find();
     allBids.forEach(async (bid) => {
       // Retiro puja del jugador
-      await db.Player.findByIdAndUpdate(bid.player, {
-        $pull: { bids: bid._id },
-      });
+      await db.Player.findByIdAndUpdate(
+        bid.player,
+        {
+          $pull: { bids: bid._id },
+        },
+        { new: true }
+      );
       // Devuelvo dinero al usuario
       await db.User.findByIdAndUpdate(bid.user, { $inc: { money: bid.money } });
     });
@@ -163,7 +171,11 @@ export const Delete = async (req) => {
   try {
     const { id } = req.params;
     const bid = await db.Bid.findByIdAndUpdate(id);
-    await db.User.findByIdAndUpdate(bid.user, { $inc: { money: bid.money } });
+    await db.User.findByIdAndUpdate(
+      bid.user,
+      { $inc: { money: bid.money } },
+      { new: true }
+    );
     const removedBid = await db.Bid.findByIdAndDelete(id);
     return removedBid;
   } catch (error) {

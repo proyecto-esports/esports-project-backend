@@ -29,10 +29,14 @@ export const Create = async (req, res) => {
 
     const competition = await new db.Competition(req.body);
 
-    const userUpdated = await db.User.findByIdAndUpdate(userId, {
-      role: 'admin',
-      competition: competition._id,
-    });
+    const userUpdated = await db.User.findByIdAndUpdate(
+      userId,
+      {
+        role: 'admin',
+        competition: competition._id,
+      },
+      { new: true }
+    );
 
     const savedCompetition = await competition.save();
 
@@ -101,9 +105,13 @@ export const UpdateUsers = async (req) => {
   try {
     const { id } = req.params;
     const { user } = req.body;
-    const competitionUpdate = await db.Competition.findByIdAndUpdate(id, {
-      $push: { users: user },
-    });
+    const competitionUpdate = await db.Competition.findByIdAndUpdate(
+      id,
+      {
+        $push: { users: user },
+      },
+      { new: true }
+    );
     return competitionUpdate;
   } catch (error) {
     LogDanger('Cannot update the users of the competition', error);
@@ -144,14 +152,22 @@ export const UpdateMarket = async (req) => {
               { new: true }
             );
           } else {
-            await db.User.findByIdAndUpdate(bid.user, {
-              $inc: { money: bid.money },
-            });
+            await db.User.findByIdAndUpdate(
+              bid.user,
+              {
+                $inc: { money: bid.money },
+              },
+              { new: true }
+            );
           }
           // $unset deletes a specified field, no matter what value you pass
-          await db.Player.findByIdAndUpdate(player._id, {
-            $unset: { bids: [] },
-          });
+          await db.Player.findByIdAndUpdate(
+            player._id,
+            {
+              $unset: { bids: [] },
+            },
+            { new: true }
+          );
 
           await db.Bid.findByIdAndDelete(bid._id);
         });
