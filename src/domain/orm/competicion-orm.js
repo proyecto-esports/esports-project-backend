@@ -71,7 +71,7 @@ export const GetName = async (req) => {
     const competition = await db.Competition.find({ name: name }).populate(
       'users market'
     );
-    console.log(competition);
+
     if (!competition) return LogDanger('Cannot get the name');
     return competition;
   } catch (error) {
@@ -90,7 +90,6 @@ export const Update = async (req) => {
     ).populate('users market');
     competitionUpdate._id = id;
 
-    console.log(competitionUpdate);
     return competitionUpdate;
   } catch (error) {
     LogDanger('Cannot update the competition', error);
