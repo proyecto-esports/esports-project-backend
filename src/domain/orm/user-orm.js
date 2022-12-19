@@ -40,7 +40,6 @@ export const Login = async (req, res) => {
     const userInDB = await db.User.findOne({ gmail: req.body.gmail }).populate({
       path: 'players lineup competition',
     });
-    console.log('userInDB', userInDB);
     if (!userInDB) return LogDanger("Login credentials doesn't exist");
 
     if (bcrypt.compareSync(req.body.password, userInDB.password)) {
