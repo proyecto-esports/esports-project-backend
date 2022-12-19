@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const player = (db) => {
   const playerSchema = new db.Schema({
-    nickname: { type: String, required: true },
+    nickname: { type: String, required: true, unique: true },
     value: { type: Number, required: true },
     points: { type: Number, default: 0 },
     image: { type: String},

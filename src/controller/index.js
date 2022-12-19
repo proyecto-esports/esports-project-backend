@@ -41,6 +41,8 @@ router.get('/players/:id', player.GetOne);
 router.delete('/players/:id', player.Delete);
 router.patch('/players/:id', player.Update);
 router.put('/players/points', player.ChangePoints);
+router.delete("/players", player.DeleteAll)
+router.post("/players/create-multiple", player.CreateMultiple)
 router.post('/competitions', competition.Create);
 router.get('/competitions', competition.GetAll);
 router.get('/competitions/:id', competition.GetOne);

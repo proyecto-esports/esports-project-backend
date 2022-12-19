@@ -239,3 +239,69 @@ export const AddBid = async (req, res) => {
     return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
   }
 };
+
+export const DeleteAll = async (req, res) => {
+  let status = 'Success';
+  let errorcode = '';
+  let message = '';
+  let data = '';
+  let statuscode = 0;
+  let response = {};
+  try {
+    let resOrm = await ormPlayer.DeleteAll(req);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Success delete all players'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_OK);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    LogDanger('error: ', error);
+    response = await ResponseService(
+      'Failure',
+      enum_.CODE_BAD_REQUEST,
+      error,
+      ''
+    );
+    return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
+  }
+};
+
+export const CreateMultiple = async (req, res) => {
+  let status = 'Success';
+  let errorcode = '';
+  let message = '';
+  let data = '';
+  let statuscode = 0;
+  let response = {};
+  try {
+    let resOrm = await ormPlayer.CreateMultiple(req);
+    if (resOrm.error) {
+      (status = 'Failure'),
+        (errorcode = resOrm.error.code),
+        (message = resOrm.error.message),
+        (statuscode = enum_.CODE_BAD_REQUEST);
+    } else {
+      (message = 'Success create multiple players'),
+        (data = resOrm),
+        (statuscode = enum_.CODE_OK);
+    }
+    response = await ResponseService(status, errorcode, message, data);
+    return res.status(statuscode).send(response);
+  } catch (error) {
+    LogDanger('error: ', error);
+    response = await ResponseService(
+      'Failure',
+      enum_.CODE_BAD_REQUEST,
+      error,
+      ''
+    );
+    return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(response);
+  }
+};
