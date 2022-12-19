@@ -82,9 +82,13 @@ export const Update = async (req, res) => {
       newPass = bcrypt.hashSync(password, 6);
     }
 
-    const updatedUser = await db.User.findByIdAndUpdate(id, {
-      $set: { password: newPass },
-    });
+    const updatedUser = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $set: { password: newPass },
+      },
+      { new: true }
+    ).populate('players lineup competition');
 
     return updatedUser;
   } catch (error) {

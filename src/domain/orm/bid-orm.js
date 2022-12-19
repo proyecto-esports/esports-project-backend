@@ -92,16 +92,17 @@ export const Create = async (req) => {
       });
       const savedBid = await bid.save();
 
-      await db.User.findByIdAndUpdate(userId, { money: user.money - money });
-
-      const bidInPlayer = await db.Player.findByIdAndUpdate(
-        playerId,
-        {
-          $push: { bids: savedBid._id },
-        },
+      const updatedUser = await db.User.findByIdAndUpdate(
+        userId,
+        { money: user.money - money },
         { new: true }
-      );
-      return bidInPlayer;
+      ).populate('players lineup competition');
+
+      await db.Player.findByIdAndUpdate(playerId, {
+        $push: { bids: savedBid._id },
+      });
+
+      return updatedUser;
     }
   } catch (error) {
     LogDanger('Cannot create Bid', error);
