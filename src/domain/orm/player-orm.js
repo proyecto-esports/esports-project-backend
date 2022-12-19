@@ -9,7 +9,6 @@ const db = conn.connMongo;
 export const Create = async (req) => {
   try {
     const newPlayer = new db.Player(req.body);
-    console.log(newPlayer);
     const playerExists = await db.Player.findOne({
       nickname: newPlayer.nickname,
     });
