@@ -272,7 +272,6 @@ export const InicialPlayers = async (req) => {
       path: 'competition',
       populate: { path: 'market' },
     });
-
     const allUser = await db.User.find();
     const allPlayers = await db.Player.find();
 
