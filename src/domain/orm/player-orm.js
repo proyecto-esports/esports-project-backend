@@ -16,7 +16,7 @@ export const Create = async (req) => {
     const savedPlayer = await newPlayer.save();
     return savedPlayer;
   } catch (error) {
-    LogDanger('User register failed', error);
+    LogDanger('Cannot save the player', error);
     return await { error: { code: 123, message: error } };
   }
 };
@@ -106,6 +106,27 @@ export const ChangePoints = async (req) => {
     return actualizados;
   } catch (error) {
     LogDanger('Player update failed', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const DeleteAll = async () => {
+  try {
+    const { deletedCount } = await db.Player.deleteMany();
+    return `${deletedCount} players deleted`;
+  } catch (error) {
+    LogDanger('Delete all players failed', error);
+    return await { error: { code: 123, message: error } };
+  }
+};
+
+export const CreateMultiple = async (req) => {
+  try {
+    const { players } = req.body;
+    const createdPlayers = await db.Player.create(players);
+    return 'Multiple players created';
+  } catch (error) {
+    LogDanger('Create all players failed', error);
     return await { error: { code: 123, message: error } };
   }
 };
