@@ -9,9 +9,12 @@ const db = conn.connMongo;
 export const Create = async (req) => {
   try {
     const newPlayer = new db.Player(req.body);
-    const playerExists = await db.Player.findOne({
-      nickname: newPlayer.nickname,
-    });
+    const playerExists = await db.Player.findOne(
+      {
+        nickname: newPlayer.nickname,
+      },
+      { new: true }
+    );
     if (playerExists) return LogDanger('That player already exists');
     const savedPlayer = await newPlayer.save();
     return savedPlayer;
@@ -91,15 +94,19 @@ export const ChangePoints = async (req) => {
       let asists = Math.floor(Math.random() * (40 + 1));
       let dmg = Math.floor(Math.random() * (6000 + 1));
       let id = player._id;
-      const updatedPlayer = await db.Player.findByIdAndUpdate(id, {
-        stats: {
-          kills: kills,
-          deads: deads,
-          asists: asists,
-          dmg: dmg,
+      const updatedPlayer = await db.Player.findByIdAndUpdate(
+        id,
+        {
+          stats: {
+            kills: kills,
+            deads: deads,
+            asists: asists,
+            dmg: dmg,
+          },
+          points: kills * 100 - deads * 50 + asists * 50 + dmg,
         },
-        points: kills * 100 - deads * 50 + asists * 50 + dmg,
-      });
+        { new: true }
+      );
       actualizados.push(updatedPlayer);
       return updatedPlayer;
     });

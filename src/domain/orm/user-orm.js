@@ -81,7 +81,7 @@ export const Update = async (req, res) => {
     if (password) {
       newPass = bcrypt.hashSync(password, 6);
     }
-    
+
     const updatedUser = await db.User.findByIdAndUpdate(id, {
       $set: { password: newPass },
     });
@@ -152,9 +152,13 @@ export const UpdateLineup = async (req) => {
     if (savePlayers.includes(line)) {
       if (linePlayers.length) {
         if (!linePlayers.includes(line)) {
-          const updatedLineup = await db.User.findByIdAndUpdate(id, {
-            $push: { lineup: line },
-          });
+          const updatedLineup = await db.User.findByIdAndUpdate(
+            id,
+            {
+              $push: { lineup: line },
+            },
+            { new: true }
+          );
           return updatedLineup;
         } else {
           LogDanger('That player already lineup');
@@ -163,9 +167,13 @@ export const UpdateLineup = async (req) => {
           };
         }
       } else {
-        const updatedLineup = await db.User.findByIdAndUpdate(id, {
-          $push: { lineup: line },
-        });
+        const updatedLineup = await db.User.findByIdAndUpdate(
+          id,
+          {
+            $push: { lineup: line },
+          },
+          { new: true }
+        );
         return updatedLineup;
       }
     } else {
@@ -194,9 +202,13 @@ export const UpdateUsersPoints = async (req) => {
         line.lineup.forEach((player) => {
           totalPoints += player.points;
         });
-        const updatepoints = await db.User.findByIdAndUpdate(user, {
-          $inc: { points: totalPoints },
-        });
+        const updatepoints = await db.User.findByIdAndUpdate(
+          user,
+          {
+            $inc: { points: totalPoints },
+          },
+          { new: true }
+        );
         return updatepoints;
       };
 
@@ -236,9 +248,13 @@ export const UpdateCompetition = async (req) => {
   try {
     const { id } = req.params;
     const { competition } = req.body;
-    const updateCompetition = await db.User.findByIdAndUpdate(id, {
-      $set: { competitions: competition },
-    });
+    const updateCompetition = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $set: { competitions: competition },
+      },
+      { new: true }
+    );
     return updateCompetition;
   } catch (error) {
     console.log('error = ', error);
@@ -252,9 +268,13 @@ export const UpdateRole = async (req) => {
   try {
     const { id } = req.params;
     const { role } = req.body;
-    const updateRole = await db.User.findByIdAndUpdate(id, {
-      $set: { role: role },
-    });
+    const updateRole = await db.User.findByIdAndUpdate(
+      id,
+      {
+        $set: { role: role },
+      },
+      { new: true }
+    );
     return updateRole;
   } catch (error) {
     console.log('error = ', error);
@@ -296,12 +316,16 @@ export const InicialPlayers = async (req) => {
     });
 
     if (randomPlayers.length) {
-      const playersUserUpdate = await db.User.findByIdAndUpdate(id, {
-        $set: {
-          players: randomPlayers.slice(0, 5),
-          lineup: randomPlayers.slice(0, 5),
+      const playersUserUpdate = await db.User.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            players: randomPlayers.slice(0, 5),
+            lineup: randomPlayers.slice(0, 5),
+          },
         },
-      });
+        { new: true }
+      );
       return playersUserUpdate;
     }
 
