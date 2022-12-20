@@ -354,7 +354,8 @@ export const SellPlayer = async (req) => {
 
     const playerToSellValue = playerToSell.value;
     const reducedValue = playerToSellValue * 0.7;
-    const newUserMoney = getUser.money + reducedValue;
+    const rounding = Math.round(reducedValue);
+    const newUserMoney = getUser.money + rounding;
     const updateMoney = await db.User.findByIdAndUpdate(
       id,
       {
