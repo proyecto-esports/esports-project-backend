@@ -90,6 +90,7 @@ export const Create = async (req) => {
         money: money,
         player: playerId,
       });
+
       const savedBid = await bid.save();
 
       const updatedUser = await db.User.findByIdAndUpdate(

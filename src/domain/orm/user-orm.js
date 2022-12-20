@@ -389,22 +389,18 @@ export const changePlayerLineup = async (req) => {
     if (lineupUser.length) {
       if (lineupUser.length > 4) {
         if (!lineupUser.includes(newPlayer)) {
-          const addPlayer = await db.User.findByIdAndUpdate(
-            id,
-            {
-              $pull: { lineup: currentPlayer },
-            },
-            { new: true }
-          );
-          const removePlayer = await db.User.findByIdAndUpdate(
+          await db.User.findByIdAndUpdate(id, {
+            $pull: { lineup: currentPlayer },
+          });
+          const userUpdated = await db.User.findByIdAndUpdate(
             id,
             {
               $push: { lineup: newPlayer },
             },
             { new: true }
           );
-
-          return removePlayer;
+          console.log('userUpdated', userUpdated);
+          return userUpdated;
         } else {
           LogDanger('That player already lineup.');
           return await {

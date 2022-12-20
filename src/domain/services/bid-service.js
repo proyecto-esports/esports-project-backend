@@ -50,7 +50,7 @@ export const Create = async (req, res) => {
       if (resOrm.error) {
         (status = 'Failure'),
           (errorcode = resOrm.error.code),
-          (message = resOrm.error.messsage),
+          (message = resOrm.error.message),
           (statuscode = enum_.CODE_BAD_REQUEST);
       } else {
         (message = 'Bid created'),
@@ -82,7 +82,6 @@ export const DeleteAll = async (req, res) => {
   let response = {};
   try {
     let resOrm = await ormBid.DeleteAll(req);
-    console.log(resOrm);
     if (resOrm.error) {
       (status = 'Failure'),
         (errorcode = resOrm.error.code),
