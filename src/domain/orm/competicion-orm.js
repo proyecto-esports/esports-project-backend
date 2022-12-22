@@ -121,6 +121,7 @@ export const UpdateUsers = async (req) => {
 
 export const UpdateMarket = async (req) => {
   try {
+    // SOLICITUD COMPETICIÓN
     const { id } = req.params;
     const selectCompetition = await db.Competition.findById(id)
       .populate({ path: 'market', populate: { path: 'bids' } })
@@ -130,12 +131,13 @@ export const UpdateMarket = async (req) => {
       });
 
     const competitionUsers = selectCompetition.users;
-    // DESACTIVO JUGADORES ACTUALES
+    // JUGADORES ACTUALES DESACTIVADOS
     const disabledPlayers = selectCompetition.market;
 
-    // ASIGNO JUGADORES A GANADORES
+    // JUGADORES A GANADORES
     disabledPlayers.forEach((player) => {
       if (player.bids.length) {
+        // PUJAS DE MAYOR A MENOR
         player.bids.sort((bidA, bidB) => {
           if (bidA.money > bidB.money) return -1;
           if (bidA.money < bidB.money) return 1;
@@ -143,6 +145,7 @@ export const UpdateMarket = async (req) => {
         });
 
         player.bids.forEach(async (bid, i) => {
+          // ASIGNAMOS EL JUGADOR A LA PRIMERA (MÁS ALTA)
           if (i === 0) {
             await db.User.findByIdAndUpdate(
               bid.user,
@@ -151,6 +154,7 @@ export const UpdateMarket = async (req) => {
               },
               { new: true }
             );
+          // DEVOLVEMOS EL DINERO AL RESTO
           } else {
             await db.User.findByIdAndUpdate(
               bid.user,
@@ -160,6 +164,7 @@ export const UpdateMarket = async (req) => {
               { new: true }
             );
           }
+          // RESETEAMOS PUJAS POR JUJADOR
           // $unset deletes a specified field, no matter what value you pass
           await db.Player.findByIdAndUpdate(
             player._id,
@@ -168,20 +173,19 @@ export const UpdateMarket = async (req) => {
             },
             { new: true }
           );
-
+          // CERRAMOS PUJA EN BD
           await db.Bid.findByIdAndDelete(bid._id);
         });
       }
     });
-
-    // DESACTIVO JUGADORES EN POSESIÓN
+    // JUGADORES EN POSESIÓN DESACTIVADOS
     const allPlayers = await db.Player.find();
     competitionUsers.forEach((user) => {
       user.players.forEach((player) => {
         disabledPlayers.push(player);
       });
     });
-
+    // FILTRAMOS JUGADORES LIBRES
     const freePlayers = allPlayers.filter((player) => {
       let free = true;
 
@@ -191,7 +195,7 @@ export const UpdateMarket = async (req) => {
 
       return free;
     });
-
+    // BARAJAMOS JUGADORES
     const randomMarket = freePlayers.sort(() => Math.random() - 0.5);
 
     if (randomMarket.length) {
@@ -199,7 +203,7 @@ export const UpdateMarket = async (req) => {
         id,
         {
           $set: {
-            market: randomMarket.slice(0, 8),
+            market: randomMarket.slice(0, 8), // <--- RENOVAMOS 8 EN EL MERCADO
           },
         },
         { new: true }
